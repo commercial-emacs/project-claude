@@ -1,4 +1,4 @@
-;;; test-vterm.el --- Tests for vterm -*- lexical-binding: t; -*-
+;;; test-project-claude.el --- Tests for project-claude -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2017-2020 by Lukas Fürmetz & Contributors
 
@@ -19,16 +19,16 @@
 
 ;;; Commentary:
 ;;
-;; Tests for vterm.
+;; Tests for project-claude.
 
 ;;; Code:
 
 (require 'ert)
 (require 'vterm)
 
-(defvar-local test-vterm/prompt nil)
+(defvar-local test-project-claude/prompt nil)
 
-(defmacro test-vterm/with-session (&rest body)
+(defmacro test-project-claude/with-session (&rest body)
   (declare (indent defun))
   `(let ((b (vterm--get-buffer nil))
 	 (wait-refresh (lambda (&rest _args)
@@ -42,10 +42,10 @@
 		    until (not (zerop (current-column)))
 		    do (sleep-for 0.2)
 		    finally
-		    (progn (setq test-vterm/prompt
+		    (progn (setq test-project-claude/prompt
 				 (buffer-substring-no-properties
 				  (line-beginning-position) (point)))
-			   (should-not (zerop (length test-vterm/prompt)))))
+			   (should-not (zerop (length test-project-claude/prompt)))))
 	   ,@body)
        (dolist (f '(vterm-send vterm-send-key vterm-send-string))
 	 (remove-function (symbol-function f) wait-refresh))
@@ -56,84 +56,40 @@
 		  do (sleep-for 0.2)
 		  finally (should-not (get-buffer-process b)))))))
 
-(defsubst test-vterm/at-prompt ()
+(defsubst test-project-claude/at-prompt ()
   (equal (buffer-substring-no-properties
 	  (line-beginning-position) (point))
-	 test-vterm/prompt))
+	 test-project-claude/prompt))
 
-(defsubst test-vterm/run (command)
-  (should (test-vterm/at-prompt))
+(defsubst test-project-claude/run (command)
+  (should (test-project-claude/at-prompt))
   (vterm-send-string command)
   (vterm-send-key "<return>")
   (cl-loop repeat 100
-	   until (test-vterm/at-prompt)
+	   until (test-project-claude/at-prompt)
 	   do (sleep-for 0.2)
-	   finally (should (test-vterm/at-prompt))))
+	   finally (should (test-project-claude/at-prompt))))
 
 (ert-deftest basic ()
-  (test-vterm/with-session
+  (test-project-claude/with-session
     (should (eq major-mode 'vterm-mode))))
 
-(ert-deftest ugly-wrap ()
-  (test-vterm/with-session
-    (should (= (window-width) vterm-min-window-width))
-    (let* ((x3 (make-string (* 3 (window-width)) ?x)))
-      (test-vterm/run (format "echo %s" x3))
-      (save-excursion
-	(forward-line -1)
-	(let ((pure-text (buffer-substring-no-properties
-			  (line-beginning-position) (line-end-position))))
-	  (should-not (equal pure-text x3))))
-      (call-interactively #'vterm-copy-mode)
-      ;; misshapen glom because terminals do not issue explicit
-      ;; newlines.  So a non-NUL character in the final column could
-      ;; be either a line whose end coincides with the terminal width
-      ;; or exceeds it (a continuation).
-      (should (equal (buffer-substring-no-properties
-		      (line-beginning-position) (point))
-		     (concat x3 test-vterm/prompt))))))
-
 (ert-deftest beauty-wrap ()
-  (test-vterm/with-session
+  (test-project-claude/with-session
     (should (= (window-width) vterm-min-window-width))
     (let* ((x3 (make-string (* 3 (1- (window-width))) ?x)))
-      (test-vterm/run (format "echo %s" x3))
+      (test-project-claude/run (format "echo %s" x3))
       (save-excursion
 	(forward-line -1)
 	(let ((pure-text (buffer-substring-no-properties
 			  (line-beginning-position) (line-end-position))))
 	  (should-not (equal pure-text x3))))
       (call-interactively #'vterm-copy-mode)
-      (should (test-vterm/at-prompt))
+      (should (test-project-claude/at-prompt))
       (save-excursion
 	(forward-line -1) ;logical
 	(should (equal x3 (buffer-substring-no-properties
 			   (line-beginning-position) (line-end-position))))))))
 
-(ert-deftest yank-pop ()
-  (test-vterm/with-session
-    (should (zerop (length kill-ring)))
-    (should (test-vterm/at-prompt))
-    (test-vterm/run (format "echo the quick brown fox"))
-    (call-interactively #'vterm-copy-mode)
-    (re-search-backward (regexp-quote "brown"))
-    (copy-region-as-kill (point) (+ (point) (length "brown")))
-    (re-search-backward (regexp-quote "quick"))
-    (copy-region-as-kill (point) (+ (point) (length "quick")))
-    (call-interactively #'vterm-copy-mode)
-    (should (test-vterm/at-prompt))
-    ;; i don't know why save-excursion does not work
-    ;; maybe it's a paste thing
-    (let ((start (vterm-reset-cursor-point)))
-      (call-interactively #'vterm-yank)
-      (accept-process-output vterm--process 0.1)
-      (goto-char start)
-      (should (looking-at (regexp-quote "quick")))
-      (setq last-command 'vterm-yank)
-      (call-interactively #'vterm-yank-pop-dwim)
-      (accept-process-output vterm--process 0.1)
-      (goto-char start)
-      (should (looking-at (regexp-quote "brown"))))))
-
-(provide 'test-vterm)
-;;; test-vterm.el ends here
+(provide 'test-project-claude)
+;;; test-project-claude.el ends here

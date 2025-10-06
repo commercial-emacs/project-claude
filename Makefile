@@ -4,10 +4,10 @@ ELSRC := $(shell git ls-files project*.el)
 TESTSRC := $(shell git ls-files test-*.el)
 
 .PHONY: compile
-compile: $(CURDIR)/deps/archives/gnu/archive-contents
+compile: deps/archives/gnu/archive-contents
 	$(EMACS) -batch \
 	  --eval "(setq byte-compile-error-on-warn t)" \
-	  --eval "(setq package-user-dir \"$(CURDIR)/deps\")" \
+	  --eval "(setq package-user-dir \"deps\")" \
 	  -f package-initialize \
 	  -L . \
 	  -f batch-byte-compile $(ELSRC) $(TESTSRC); \
@@ -38,18 +38,24 @@ define install-recipe
 	$(MAKE) dist
 	( \
 	PKG_NAME=`$(EMACS) -batch -L . -l project-claude-package --eval "(princ (project-claude-package-name))"`; \
-	$(EMACS) --batch -l package --eval "(setq package-user-dir $(1))" \
+	$(EMACS) --batch -l package --eval "(setq package-user-dir (expand-file-name $(1)))" \
 	  -f package-initialize \
 	  --eval "(ignore-errors (apply (function package-delete) (alist-get (quote project-claude) package-alist)))" \
 	  -f package-refresh-contents \
 	  --eval "(package-install-file \"$${PKG_NAME}.tar\")"; \
-	PKG_DIR=`$(EMACS) -batch -l package --eval "(setq package-user-dir $(1))" -f package-initialize --eval "(princ (package-desc-dir (car (alist-get 'project-claude package-alist))))"`; \
+	PKG_DIR=`$(EMACS) -batch -l package --eval "(setq package-user-dir (expand-file-name $(1)))" -f package-initialize --eval "(princ (package-desc-dir (car (alist-get 'project-claude package-alist))))"`; \
 	)
 	$(MAKE) dist-clean
 endef
 
-$(CURDIR)/deps/archives/gnu/archive-contents:
-	$(call install-recipe,\"$(CURDIR)/deps\")
+emacs-libvterm/deps/archives/gnu/archive-contents:
+	rm -rf emacs-libvterm
+	git clone --depth 1 https://github.com/commercial-emacs/emacs-libvterm.git
+	make -C emacs-libvterm deps/archives/gnu/archive-contents
+	cp -pr emacs-libvterm/deps/vterm* deps/
+
+deps/archives/gnu/archive-contents: emacs-libvterm/deps/archives/gnu/archive-contents
+	$(call install-recipe,\"deps\")
 
 .PHONY: install
 install:
