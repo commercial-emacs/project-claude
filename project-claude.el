@@ -25,9 +25,11 @@
 (require 'project)
 (require 'vterm)
 
+;; just suggest this in README
+;;   (add-to-list 'project-switch-commands '(project-claude "Claude" ?c))
+
 (defun project-claude ()
   (interactive)
-  (require 'vterm)
   (let* ((proj (project-most-recent-project))
 	 (dir (project-root proj)))
     (if-let ((extant (seq-find
