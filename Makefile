@@ -7,7 +7,7 @@ TESTSRC := $(shell git ls-files test-*.el)
 compile: deps/archives/gnu/archive-contents
 	$(EMACS) -batch \
 	  --eval "(setq byte-compile-error-on-warn t)" \
-	  --eval "(setq package-user-dir \"deps\")" \
+	  --eval "(setq package-user-dir (expand-file-name \"deps\"))" \
 	  -f package-initialize \
 	  -L . \
 	  -f batch-byte-compile $(ELSRC) $(TESTSRC); \
@@ -15,7 +15,10 @@ compile: deps/archives/gnu/archive-contents
 
 .PHONY: test
 test: compile
-	$(EMACS) --batch -L . $(patsubst %.el,-l %,$(notdir $(TESTSRC))) -f ert-run-tests-batch
+	$(EMACS) --batch --eval "(setq package-user-dir (expand-file-name \"deps\"))" \
+	  -f package-initialize \
+	  -L . $(patsubst %.el,-l %,$(notdir $(TESTSRC))) \
+	  -f ert-run-tests-batch
 
 .PHONY: dist-clean
 dist-clean:
@@ -48,15 +51,29 @@ define install-recipe
 	$(MAKE) dist-clean
 endef
 
-emacs-libvterm/deps/archives/gnu/archive-contents:
-	rm -rf emacs-libvterm
+emacs-libvterm/vterm.el:
 	git clone --depth 1 https://github.com/commercial-emacs/emacs-libvterm.git
-	make -C emacs-libvterm deps/archives/gnu/archive-contents
+
+# I'd use a vterm-specific filename but I don't want to hardcode version
+emacs-libvterm/deps/archives/gnu/archive-contents:
+	rm -rf deps
+	$(MAKE) emacs-libvterm/vterm.el
+	$(MAKE) -C emacs-libvterm deps/archives/gnu/archive-contents
+	mkdir -p deps
 	cp -pr emacs-libvterm/deps/vterm* deps/
 
 deps/archives/gnu/archive-contents: emacs-libvterm/deps/archives/gnu/archive-contents
 	$(call install-recipe,\"deps\")
 
+.PHONY: install-emacs-libvterm
+install-emacs-libvterm:
+	$(MAKE) emacs-libvterm/vterm.el
+	$(MAKE) -C emacs-libvterm install
+
 .PHONY: install
 install:
+	@$(EMACS) --batch -f package-initialize -l vterm \
+	  --eval "(or (version-list-<= '(0 0 4) \
+	   (package-desc-version (car (alist-get 'vterm package-alist)))) \
+	   (error))" || $(MAKE) install-emacs-libvterm
 	$(call install-recipe,package-user-dir)
