@@ -28,11 +28,6 @@
 
 (ert-deftest basic ()
   (with-temp-buffer
-    (should (member '(project-claude "Claude" ?c) project-switch-commands))
-    (customize-set-variable 'project-claude-project-switch-command nil)
-    (should-not (member '(project-claude "Claude" ?c) project-switch-commands))
-    (customize-set-variable 'project-claude-project-switch-command t)
-    (should (member '(project-claude "Claude" ?c) project-switch-commands))
     (with-current-buffer (project-claude)
       (cl-loop repeat 100
 	       until (string-match-p "claude$" (buffer-string))

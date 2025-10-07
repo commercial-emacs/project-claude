@@ -25,23 +25,6 @@
 (require 'project)
 (require 'vterm)
 
-(defun project-claude-modify-project-switch-commands ()
-  (defvar project-claude-project-switch-command)
-  (let ((command '(project-claude "Claude" ?c)))
-    (if project-claude-project-switch-command
-        (add-to-list 'project-switch-commands command :append)
-      (when (member command project-switch-commands)
-        (customize-set-variable 'project-switch-commands
-                                (delete command project-switch-commands))))))
-
-(defcustom project-claude-project-switch-command t
-  "Add to `project-switch-commands'."
-  :type 'symbol
-  :set (lambda (symbol value)
-         (set-default symbol value)
-         (project-claude-modify-project-switch-commands))
-  :group 'project-claude)
-
 (defcustom project-claude-invocation nil
   "Command line shell invocation."
   :group 'project-claude
@@ -69,8 +52,6 @@
 	  (vterm-send-string (or project-claude-invocation "claude"))
 	  (vterm-send-key "<return>")
           (current-buffer))))))
-
-(project-claude-modify-project-switch-commands)
 
 (provide 'project-claude)
 ;; Local Variables:
