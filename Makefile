@@ -33,7 +33,7 @@ dist: dist-clean
 	$(EMACS) -batch -L . -l project-claude-package -f project-claude-package-inception
 	( \
 	PKG_NAME=`$(EMACS) -batch -L . -l project-claude-package --eval "(princ (project-claude-package-name))"`; \
-	rsync -R $(ELSRC) $${PKG_NAME}; \
+	rsync -R $(ELSRC) $${PKG_NAME} && \
 	tar cf $${PKG_NAME}.tar $${PKG_NAME}; \
 	)
 
