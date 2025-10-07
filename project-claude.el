@@ -29,7 +29,7 @@
   (defvar project-claude-project-switch-command)
   (let ((command '(project-claude "Claude" ?c)))
     (if project-claude-project-switch-command
-        (add-to-list 'project-switch-commands command)
+        (add-to-list 'project-switch-commands command :append)
       (when (member command project-switch-commands)
         (customize-set-variable 'project-switch-commands
                                 (delete command project-switch-commands))))))
