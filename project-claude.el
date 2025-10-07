@@ -59,12 +59,13 @@
 			       (equal (expand-file-name default-directory)
 				      (expand-file-name dir)))))
 		      (buffer-list))))
-	(pop-to-buffer-same-window extant)
+	(pop-to-buffer extant)
       (let ((default-directory dir))
 	(with-current-buffer (vterm (format "*claude-%s*"
 					    (project-name proj)))
 	  (vterm-send-string (or project-claude-invocation "claude"))
-	  (vterm-send-key "<return>"))))))
+	  (vterm-send-key "<return>")
+          (current-buffer))))))
 
 (project-claude-modify-project-switch-commands)
 

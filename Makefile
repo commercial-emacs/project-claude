@@ -64,6 +64,11 @@ emacs-libvterm/deps/archives/gnu/archive-contents:
 
 deps/archives/gnu/archive-contents: emacs-libvterm/deps/archives/gnu/archive-contents
 	$(call install-recipe,\"deps\")
+	rm -rf deps/project-claude* # just keep deps
+
+.PHONY: clean
+clean:
+	git clean -dffx # ff because emacs-libvterm has a git subdir
 
 .PHONY: install-emacs-libvterm
 install-emacs-libvterm:

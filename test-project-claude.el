@@ -28,7 +28,16 @@
 
 (ert-deftest basic ()
   (with-temp-buffer
-    (call-interactively #'project-claude)))
+    (should (member '(project-claude "Claude" ?c) project-switch-commands))
+    (customize-set-variable 'project-claude-project-switch-command nil)
+    (should-not (member '(project-claude "Claude" ?c) project-switch-commands))
+    (customize-set-variable 'project-claude-project-switch-command t)
+    (should (member '(project-claude "Claude" ?c) project-switch-commands))
+    (with-current-buffer (project-claude)
+      (cl-loop repeat 100
+	       until (string-match-p "claude$" (buffer-string))
+	       do (sleep-for 0.2)
+	       finally (should (cl-search "claude" (buffer-string)))))))
 
 (provide 'test-project-claude)
 ;;; test-project-claude.el ends here
