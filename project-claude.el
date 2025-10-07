@@ -51,7 +51,9 @@
 ;;;###autoload
 (defun project-claude ()
   (interactive)
-  (let* ((proj (project-most-recent-project))
+  (let* ((proj (if (boundp 'project-most-recent-project)
+                   (funcall 'project-most-recent-project)
+                 (project-current)))
 	 (dir (project-root proj)))
     (if-let ((extant (seq-find
 		      (lambda (b)
