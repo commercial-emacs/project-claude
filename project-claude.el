@@ -48,6 +48,7 @@
   :type '(choice (const :tag "None" nil)
           (string :tag "Value")))
 
+;;;###autoload
 (defun project-claude ()
   (interactive)
   (let* ((proj (project-most-recent-project))
