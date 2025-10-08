@@ -49,6 +49,9 @@
       (let ((default-directory dir))
 	(with-current-buffer (vterm-other-window
                               (format "*claude-%s*" (project-name proj)))
+	  (cl-loop repeat 100
+		   until (not (zerop (current-column)))
+		   do (sleep-for 0.02))
 	  (vterm-send-string (or project-claude-invocation "claude"))
 	  (vterm-send-key "<return>")
           (current-buffer))))))
