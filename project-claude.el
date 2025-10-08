@@ -45,16 +45,13 @@
 			       (equal (expand-file-name default-directory)
 				      (expand-file-name dir)))))
 		      (buffer-list))))
-	(pop-to-buffer extant)
+        (pop-to-buffer extant '((display-buffer-use-some-window) . ((some-window . mru))))
       (let ((default-directory dir))
-	(with-current-buffer (vterm (format "*claude-%s*"
-					    (project-name proj)))
+	(with-current-buffer (vterm-other-window
+                              (format "*claude-%s*" (project-name proj)))
 	  (vterm-send-string (or project-claude-invocation "claude"))
 	  (vterm-send-key "<return>")
           (current-buffer))))))
 
 (provide 'project-claude)
-;; Local Variables:
-;; indent-tabs-mode: nil
-;; End:
 ;;; project-claude.el ends here
