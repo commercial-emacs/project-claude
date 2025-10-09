@@ -25,11 +25,10 @@
 (require 'project)
 (require 'vterm)
 
-(defcustom project-claude-invocation nil
+(defcustom project-claude-invocation "npx @anthropic-ai/claude-code@latest"
   "Command line shell invocation."
   :group 'project-claude
-  :type '(choice (const :tag "None" nil)
-          (string :tag "Value")))
+  :type 'string)
 
 ;;;###autoload
 (defun project-claude ()
@@ -46,15 +45,9 @@
 				      (expand-file-name dir)))))
 		      (buffer-list))))
         (pop-to-buffer extant '((display-buffer-use-some-window) . ((some-window . mru))))
-      (let ((default-directory dir))
-	(with-current-buffer (vterm-other-window
-                              (format "*claude-%s*" (project-name proj)))
-	  (cl-loop repeat 100
-		   until (not (zerop (current-column)))
-		   do (sleep-for 0.02))
-	  (vterm-send-string (or project-claude-invocation "claude"))
-	  (vterm-send-key "<return>")
-          (current-buffer))))))
+      (let ((default-directory dir)
+	    (vterm-shell (format "/bin/sh -c '%s'" project-claude-invocation)))
+	(vterm-other-window (format "*claude-%s*" (project-name proj)))))))
 
 (provide 'project-claude)
 ;;; project-claude.el ends here

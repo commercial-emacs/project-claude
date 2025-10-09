@@ -28,11 +28,10 @@
 
 (ert-deftest basic ()
   (with-temp-buffer
-    (with-current-buffer (project-claude)
-      (cl-loop repeat 100
-	       until (string-match-p "claude$" (buffer-string))
-	       do (sleep-for 0.2)
-	       finally (should (cl-search "claude" (buffer-string)))))))
+    (let ((project-claude-invocation "echo foo && sleep 10"))
+      (with-current-buffer (project-claude)
+	(sleep-for 1)
+	(should (string-match-p "foo" (buffer-string)))))))
 
 (provide 'test-project-claude)
 ;;; test-project-claude.el ends here
