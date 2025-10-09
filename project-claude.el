@@ -33,16 +33,17 @@
 ;;;###autoload
 (defun project-claude ()
   (interactive)
-  (let* ((proj (if (fboundp 'project-most-recent-project)
-                   (funcall 'project-most-recent-project)
-                 (project-current)))
-	 (dir (project-root proj)))
+  (when-let ((normalize (lambda (dir) (expand-file-name (file-name-as-directory dir))))
+	     (proj (if (fboundp 'project-most-recent-project)
+                       (funcall 'project-most-recent-project)
+                     (project-current)))
+	     (dir (project-root proj)))
     (if-let ((extant (seq-find
 		      (lambda (b)
 			(with-current-buffer b
 			  (and vterm--term
-			       (equal (expand-file-name default-directory)
-				      (expand-file-name dir)))))
+			       (equal (funcall normalize default-directory)
+				      (funcall normalize dir)))))
 		      (buffer-list))))
         (pop-to-buffer extant '((display-buffer-use-some-window) . ((some-window . mru))))
       (let ((default-directory dir)
