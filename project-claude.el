@@ -74,24 +74,29 @@ would if cold-starting from an in-band query)."
   (interactive)
   (quit-window t))
 
+(defun project-claude/issue-this (what)
+  "Black magic to simulate keyboard."
+  (cl-loop repeat 20
+	   until (not (string-empty-p (buffer-string)))
+	   do (sleep-for 0.05))
+  (when vterm-copy-mode
+    (vterm-copy-mode-done))
+  (vterm-send-string what)
+  (execute-kbd-macro (read-kbd-macro "M-: (vterm-send-key \"<return>\")"))
+  (setq this-command 'vterm-send-key))
+
 (defun project-claude/prompt-send ()
   "Send prompt buffer contents to Claude Code and close prompt buffer."
   (interactive)
   (when-let ((prompt (buffer-substring-no-properties (point-min) (point-max)))
 	     (not-empty-p (not (string-empty-p (string-trim prompt)))))
     (quit-window t)
-    (let ((buf (project-claude :no-solicit)))
-      (with-current-buffer buf
-	(cl-loop repeat 20
-		 until (not (string-empty-p (buffer-string)))
-		 do (sleep-for 0.05))
-	(when vterm-copy-mode
-	  (vterm-copy-mode-done))
-	(vterm-send-string prompt t)
-	(vterm-send-key "<return>"))
+    (let ((buf (project-claude :no-solicit t)))
       (unless (get-buffer-window buf)
 	(pop-to-buffer buf '((display-buffer-use-some-window) .
-			     ((some-window . mru))))))))
+			     ((some-window . mru)))))
+      (with-current-buffer buf
+	(project-claude/issue-this prompt)))))
 
 ;;;###autoload
 (defun project-claude/prompt ()
