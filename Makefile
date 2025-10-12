@@ -6,7 +6,7 @@ TESTSRC := $(shell git ls-files test-*.el)
 .PHONY: compile
 compile: deps/archives/gnu/archive-contents
 	$(EMACS) -batch \
-	  --eval "(setq byte-compile-error-on-warn nil)" \
+	  --eval "(setq byte-compile-error-on-warn t)" \
 	  --eval "(setq package-user-dir (expand-file-name \"deps\"))" \
 	  -f package-initialize \
 	  -L . \
