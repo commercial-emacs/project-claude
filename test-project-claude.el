@@ -28,8 +28,8 @@
 
 (ert-deftest basic ()
   (with-temp-buffer
-    (let ((project-claude-invocation "echo foo && sleep 10"))
-      (with-current-buffer (project-claude)
+    (let ((project-claude/invocation "echo foo && sleep 10"))
+      (with-current-buffer (project-claude :no-solicit t)
 	(sleep-for 1)
 	(should (string-match-p "foo" (buffer-string)))))))
 

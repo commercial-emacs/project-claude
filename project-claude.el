@@ -25,30 +25,117 @@
 (require 'project)
 (require 'vterm)
 
-(defcustom project-claude-invocation "npx @anthropic-ai/claude-code@latest"
+(defgroup project-claude nil
+  "Integration with Claude Code CLI."
+  :group 'tools
+  :prefix "project-claude/")
+
+(defcustom project-claude/invocation "npx @anthropic-ai/claude-code@latest"
   "Command line shell invocation."
   :group 'project-claude
   :type 'string)
 
 ;;;###autoload
-(defun project-claude ()
+(cl-defun project-claude (&key no-solicit)
+  "Returns Claude Code buffer for current project.
+
+Use NO-SOLICIT if wanting to avoid pre-startup questions (as one
+would if cold-starting from an in-band query)."
   (interactive)
-  (when-let ((normalize (lambda (dir) (expand-file-name (file-name-as-directory dir))))
-	     (proj (if (fboundp 'project-most-recent-project)
+  (when-let ((proj (if (fboundp 'project-most-recent-project)
                        (funcall 'project-most-recent-project)
                      (project-current)))
-	     (dir (project-root proj)))
-    (if-let ((extant (seq-find
-		      (lambda (b)
-			(with-current-buffer b
-			  (and vterm--term
-			       (equal (funcall normalize default-directory)
-				      (funcall normalize dir)))))
-		      (buffer-list))))
-        (pop-to-buffer extant '((display-buffer-use-some-window) . ((some-window . mru))))
-      (let ((default-directory dir)
-	    (vterm-shell (format "/bin/sh -c '%s'" project-claude-invocation)))
-	(vterm-other-window (format "*claude-%s*" (project-name proj)))))))
+	     (default-directory (project-root proj))
+	     (buf (get-buffer-create (format "*claude-%s*" (project-name proj)))))
+    (if (with-current-buffer buf (and vterm--term (process-live-p vterm--process)))
+	(pop-to-buffer buf '((display-buffer-use-some-window) . ((some-window . mru))))
+      (let ((vterm-shell
+	     (format "/bin/sh -c '%s'"
+		     (concat (when no-solicit
+			       "DISABLE_TELEMETRY=1 DISABLE_AUTOUPDATER=1 ")
+			     project-claude/invocation))))
+	(vterm-other-window buf)))))
+
+(defvar project-claude/prompt-mode-map
+  (let ((map (make-sparse-keymap)))
+    (define-key map (kbd "C-c C-c") 'project-claude/prompt-send)
+    (define-key map (kbd "C-c C-k") 'project-claude/prompt-cancel)
+    map)
+  "Keymap for `project-claude/prompt-mode'.")
+
+(define-derived-mode project-claude/prompt-mode text-mode "Claude-Prompt"
+  "Major mode for entering prompts to send to Claude Code.
+\\{project-claude/prompt-mode-map}"
+  (setq header-line-format
+        "Enter prompt for Claude Code. C-c C-c to send, C-c C-k to cancel"))
+
+(defun project-claude/prompt-cancel ()
+  "Call it off."
+  (interactive)
+  (quit-window t))
+
+(defun project-claude/prompt-send ()
+  "Send prompt buffer contents to Claude Code and close prompt buffer."
+  (interactive)
+  (when-let ((prompt (buffer-substring-no-properties (point-min) (point-max)))
+	     (not-empty-p (not (string-empty-p (string-trim prompt)))))
+    (quit-window t)
+    (let ((buf (project-claude :no-solicit)))
+      (with-current-buffer buf
+	(cl-loop repeat 20
+		 until (not (string-empty-p (buffer-string)))
+		 do (sleep-for 0.05))
+	(when vterm-copy-mode
+	  (vterm-copy-mode-done))
+	(vterm-send-string prompt t)
+	(vterm-send-key "<return>"))
+      (unless (get-buffer-window buf)
+	(pop-to-buffer buf '((display-buffer-use-some-window) .
+			     ((some-window . mru))))))))
+
+;;;###autoload
+(defun project-claude/prompt ()
+  "Open a prompt buffer to send queries to Claude Code."
+  (interactive)
+  (when (> (length (window-list)) 2)
+    (delete-other-windows))
+  (let ((buf (get-buffer-create "*claude-prompt*")))
+    (with-current-buffer buf
+      (project-claude/prompt-mode)
+      (erase-buffer))
+    (pop-to-buffer buf '((display-buffer-at-bottom)
+			 (window-height . 5)))))
+
+(eval-when-compile
+  (defun escape-quotes-in-docstring (string)
+    "Needs to go upstream."
+    (with-temp-buffer
+      (insert string)
+      (goto-char (point-min))
+      ;; Escape grave accents (`) that aren't already escaped
+      (while (re-search-forward "\\(?:[^\\]\\|^\\)\\(`\\)" nil t)
+        (replace-match "\\\\=`" nil nil nil 1))
+      ;; Escape apostrophes (') that aren't already escaped
+      (goto-char (point-min))
+      (while (re-search-forward "\\(?:[^\\]\\|^\\)\\('\\)" nil t)
+        (replace-match "\\\\='" nil nil nil 1))
+      (buffer-string)))
+  (add-function :filter-return (symbol-function 'internal--format-docstring-line)
+		#'escape-quotes-in-docstring))
+
+(define-minor-mode project-claude-mode
+  "Minor mode for Claude Code integration."
+  :group 'project-claude
+  :keymap (let ((map (make-sparse-keymap)))
+            (define-key map (kbd "C-c '") #'project-claude/prompt)
+            map))
+
+;;;###autoload
+(define-globalized-minor-mode global-project-claude-mode
+  project-claude-mode (lambda ()
+			(when (derived-mode-p 'prog-mode)
+			  (project-claude-mode 1)))
+  :group 'project-claude)
 
 (provide 'project-claude)
 ;;; project-claude.el ends here
