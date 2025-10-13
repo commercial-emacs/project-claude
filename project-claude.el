@@ -53,8 +53,9 @@ would if cold-starting from an in-band query)."
 	     (format "/bin/sh -c '%s'"
 		     (concat (when no-solicit
 			       "DISABLE_TELEMETRY=1 DISABLE_AUTOUPDATER=1 ")
-			     project-claude/invocation))))
-	(vterm-other-window buf)))))
+			     project-claude/invocation)))
+	    (vterm-buffer-name (buffer-name buf)))
+	(vterm-other-window)))))
 
 (defvar project-claude/prompt-mode-map
   (let ((map (make-sparse-keymap)))
@@ -104,12 +105,28 @@ would if cold-starting from an in-band query)."
   (interactive)
   (when (> (length (window-list)) 2)
     (delete-other-windows))
-  (let ((buf (get-buffer-create "*claude-prompt*")))
+  (let ((file-ref (project-claude/file-reference))
+	(buf (get-buffer-create "*claude-prompt*")))
     (with-current-buffer buf
       (project-claude/prompt-mode)
-      (erase-buffer))
+      (erase-buffer)
+      (when file-ref (insert file-ref " ")))
     (pop-to-buffer buf '((display-buffer-at-bottom)
 			 (window-height . 5)))))
+
+(defun project-claude/file-reference ()
+  "Construct Claude Code file reference from current position."
+  (when-let ((file (buffer-file-name))
+             (proj (project-current)))
+    (let* ((rel-file (file-relative-name file (project-root proj)))
+           (start (line-number-at-pos (if (use-region-p)
+                                          (region-beginning)
+                                        (point))))
+           (end (when (use-region-p)
+                  (line-number-at-pos (region-end)))))
+      (if end
+          (format "@%s:%d-%d" rel-file start end)
+        (format "@%s:%d" rel-file start)))))
 
 (eval-when-compile
   (defun escape-quotes-in-docstring (string)
