@@ -75,16 +75,36 @@ would if cold-starting from an in-band query)."
   (interactive)
   (quit-window t))
 
+(defun project-claude/wait-for-prompt (&optional timeout)
+  "Wait for Claude Code prompt to appear.
+Returns t if prompt pattern is found, nil if timeout occurs."
+  (let ((timeout (or timeout 5.0))
+        (interval 0.05)
+        (elapsed 0)
+        (prompt-pattern ">\\s-\\'"))
+    (while (and (< elapsed timeout)
+                (not (save-excursion
+                       (goto-char (point-max))
+                       (re-search-backward prompt-pattern
+                                         (max (point-min) (- (point-max) 200))
+                                         t))))
+      (sleep-for interval)
+      (setq elapsed (+ elapsed interval)))
+    (< elapsed timeout)))
+
 (defun project-claude/issue-this (what)
   "Black magic to simulate keyboard."
+  ;; Wait for initial content to appear
   (cl-loop repeat 20
 	   until (not (string-empty-p (buffer-string)))
 	   do (sleep-for 0.05))
-  (when vterm-copy-mode
-    (vterm-copy-mode-done))
-  (vterm-send-string what)
-  (execute-kbd-macro (read-kbd-macro "M-: (vterm-send-key \"<return>\")"))
-  (setq this-command 'vterm-send-key))
+  ;; Wait for prompt pattern to appear
+  (when (project-claude/wait-for-prompt 2.0)
+    (when vterm-copy-mode
+      (vterm-copy-mode-done))
+    (vterm-send-string what)
+    (execute-kbd-macro (read-kbd-macro "M-: (vterm-send-key \"<return>\")"))
+    (setq this-command 'vterm-send-key)))
 
 (defun project-claude/prompt-send ()
   "Send prompt buffer contents to Claude Code and close prompt buffer."
