@@ -27,11 +27,10 @@
 (require 'project-claude)
 
 (ert-deftest basic ()
-  (with-temp-buffer
-    (let ((project-claude/invocation "echo foo && sleep 10"))
-      (with-current-buffer (project-claude :no-solicit t)
-	(sleep-for 1)
-	(should (string-match-p "foo" (buffer-string)))))))
+  (let* ((project-claude/invocation "echo foo && sleep 20")
+	 (buf (project-claude :no-solicit t)))
+    (should (eq buf (current-buffer)))
+    (should (project-claude//wait-for (regexp-quote "foo")))))
 
 (provide 'test-project-claude)
 ;;; test-project-claude.el ends here

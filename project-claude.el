@@ -77,20 +77,17 @@ would if cold-starting from an in-band query)."
   (interactive)
   (quit-window t))
 
-(defun project-claude/wait-for (what)
+(defun project-claude//wait-for (regex &optional from)
   "Return t on success."
-  (cl-loop with success
-	   repeat 200
-	   until (save-excursion
-                   (goto-char (point-max))
-                   (setq success (re-search-backward
-				  what
-				  (save-excursion
-				    (forward-line (- (window-body-height)))
-				    (point))
-				  t)))
-	   do (accept-process-output vterm--process 0.05 nil t)
-	   finally return success))
+  (save-excursion
+    (goto-char (or from (point-min)))
+    (cl-loop with success
+	     repeat 200
+	     until (setq success (save-excursion
+				   (goto-char (or from (point-min)))
+				   (re-search-forward regex nil t)))
+	     do (accept-process-output vterm--process 0.05 nil t)
+	     finally return success)))
 
 (defun project-claude/cursor-pos ()
   (save-excursion
@@ -135,16 +132,17 @@ would if cold-starting from an in-band query)."
   "You can send commands willy-nilly to bash.
 But something about Claude Code's input processing interprets a too-soon
 RET as M-RET."
-  (when (project-claude/wait-for project-claude/prompt-regex)
+  (when (project-claude//wait-for project-claude/prompt-regex)
     (when vterm-copy-mode
       (vterm-copy-mode-done))
     ;;(project-claude/clear-input)
-    (let ((inhibit-read-only t))
-      (vterm-send-string what))
-    (when (project-claude/wait-for (regexp-quote what))
+    (let ((start (window-start)))
       (let ((inhibit-read-only t))
-	(vterm-send-key "<return>"))
-      (setq this-command 'vterm-send-key)) ;for vterm--filter
+	(vterm-send-string what))
+      (when (project-claude//wait-for (regexp-quote what) start)
+	(let ((inhibit-read-only t))
+	  (vterm-send-key "<return>"))
+	(setq this-command 'vterm-send-key))) ;for vterm--filter
     ))
 
 (defun project-claude/prompt-send ()
