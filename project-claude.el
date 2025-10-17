@@ -25,6 +25,8 @@
 (require 'project)
 (require 'vterm)
 
+(defconst project-claude/prompt-regex "─+[^─]*>\\s-+" "Unfortunate.")
+
 (defgroup project-claude nil
   "Integration with Claude Code CLI."
   :group 'tools
@@ -75,36 +77,75 @@ would if cold-starting from an in-band query)."
   (interactive)
   (quit-window t))
 
-(defun project-claude/wait-for-prompt (&optional timeout)
-  "Wait for Claude Code prompt to appear.
-Returns t if prompt pattern is found, nil if timeout occurs."
-  (let ((timeout (or timeout 5.0))
-        (interval 0.05)
-        (elapsed 0)
-        (prompt-pattern ">\\s-\\'"))
-    (while (and (< elapsed timeout)
-                (not (save-excursion
-                       (goto-char (point-max))
-                       (re-search-backward prompt-pattern
-                                         (max (point-min) (- (point-max) 200))
-                                         t))))
-      (sleep-for interval)
-      (setq elapsed (+ elapsed interval)))
-    (< elapsed timeout)))
+(defun project-claude/wait-for (what)
+  "Return t on success."
+  (cl-loop with success
+	   repeat 200
+	   until (save-excursion
+                   (goto-char (point-max))
+                   (setq success (re-search-backward
+				  what
+				  (save-excursion
+				    (forward-line (- (window-body-height)))
+				    (point))
+				  t)))
+	   do (accept-process-output vterm--process 0.05 nil t)
+	   finally return success))
+
+(defun project-claude/cursor-pos ()
+  (save-excursion
+    (goto-char (point-max))
+    (re-search-backward project-claude/prompt-regex nil t)
+    (prop-match-beginning
+     (text-property-search-forward
+      'font-lock-face t
+      (lambda (value prop)
+	"What asshole wrote and documented t-p-s-f."
+	(and (listp prop)
+	     (eq value (plist-get prop :inverse-video))))))))
+
+(defun project-claude/clear-input ()
+  "Fraught."
+  (interactive)
+  (when vterm-copy-mode
+    (vterm-copy-mode-done))
+  (save-excursion
+    (goto-char (point-max))
+    (re-search-backward project-claude/prompt-regex nil t)
+    (catch 'done
+      (let (prev-cursor cursor)
+	(while (setq cursor (project-claude/cursor-pos))
+	  (when (equal prev-cursor cursor)
+	    (throw 'done nil))
+	  (setq prev-cursor cursor)
+	  (vterm-send-key "b" nil nil '(control))
+	  (setq this-command 'vterm-send-key)
+	  (accept-process-output vterm--process 0.05 nil t))))
+    (goto-char (project-claude/cursor-pos))
+    (catch 'done
+      (while t
+	(when (or (looking-at-p "\\s-+──")
+		  (looking-at-p "Try "))
+	  (throw 'done nil))
+	(vterm-send-key "k" nil nil '(control))
+	(setq this-command 'vterm-send-key)
+	(accept-process-output vterm--process 0.05 nil t)))))
 
 (defun project-claude/issue-this (what)
-  "Black magic to simulate keyboard."
-  ;; Wait for initial content to appear
-  (cl-loop repeat 20
-	   until (not (string-empty-p (buffer-string)))
-	   do (sleep-for 0.05))
-  ;; Wait for prompt pattern to appear
-  (when (project-claude/wait-for-prompt 2.0)
+  "You can send commands willy-nilly to bash.
+But something about Claude Code's input processing interprets a too-soon
+RET as M-RET."
+  (when (project-claude/wait-for project-claude/prompt-regex)
     (when vterm-copy-mode
       (vterm-copy-mode-done))
-    (vterm-send-string what)
-    (execute-kbd-macro (read-kbd-macro "M-: (vterm-send-key \"<return>\")"))
-    (setq this-command 'vterm-send-key)))
+    ;;(project-claude/clear-input)
+    (let ((inhibit-read-only t))
+      (vterm-send-string what))
+    (when (project-claude/wait-for (regexp-quote what))
+      (let ((inhibit-read-only t))
+	(vterm-send-key "<return>"))
+      (setq this-command 'vterm-send-key)) ;for vterm--filter
+    ))
 
 (defun project-claude/prompt-send ()
   "Send prompt buffer contents to Claude Code and close prompt buffer."
@@ -113,11 +154,8 @@ Returns t if prompt pattern is found, nil if timeout occurs."
 	     (not-empty-p (not (string-empty-p (string-trim prompt)))))
     (quit-window t)
     (let ((buf (project-claude :no-solicit t)))
-      (unless (get-buffer-window buf)
-	(pop-to-buffer buf '((display-buffer-use-some-window) .
-			     ((some-window . mru)))))
-      (with-current-buffer buf
-	(project-claude/issue-this prompt)))))
+      (cl-assert (eq buf (current-buffer)))
+      (project-claude/issue-this prompt))))
 
 ;;;###autoload
 (defun project-claude/prompt ()
