@@ -1,2 +1,4 @@
 *.elc
 /deps
+project-claude-generated.el
+project-gemini-generated.el

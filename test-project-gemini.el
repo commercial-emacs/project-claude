@@ -1,11 +1,6 @@
-;;; project-claude.el --- A project.el plugin -*- lexical-binding: t; -*-
+;;; test-project-gemini.el --- Tests for project-gemini -*- lexical-binding: t; -*-
 
-;; Copyright (C) 2025 dickmao
-;;
-;; Author: dickmao
-;; Version: 0.0.1
-;; URL: https://github.com/dickmao/project-claude
-;; Package-Requires: ((vterm "0.0.4"))
+;; Copyright (C) 2017-2020 by Lukas Fürmetz & Contributors
 
 ;; This file is not part of GNU Emacs.
 
@@ -22,19 +17,20 @@
 ;; You should have received a copy of the GNU General Public License
 ;; along with GNU Emacs.  If not, see <https://www.gnu.org/licenses/>.
 
-(defconst project-claude/prompt-regex "─+[^─]*>\\s-+" "Unfortunate.")
+;;; Commentary:
+;;
+;; Tests for project-gemini.
 
-(defgroup project-claude nil
-  "Integration with Claude Code CLI."
-  :group 'tools
-  :prefix "project-claude/")
+;;; Code:
 
-(defcustom project-claude/invocation "npx @anthropic-ai/claude-code@latest"
-  "Command line shell invocation."
-  :group 'project-claude
-  :type 'string)
+(require 'ert)
+(require 'project-gemini)
 
-(require 'project-claude-generated)
+(ert-deftest basic ()
+  (let* ((project-gemini/invocation "echo foo && sleep 20")
+	 (buf (project-gemini :no-solicit t)))
+    (should (eq buf (current-buffer)))
+    (should (project-gemini//wait-for (regexp-quote "foo")))))
 
-(provide 'project-claude)
-;;; project-claude.el ends here
+(provide 'test-project-gemini)
+;;; test-project-gemini.el ends here

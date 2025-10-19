@@ -1,10 +1,10 @@
-;;; project-claude.el --- A project.el plugin -*- lexical-binding: t; -*-
+;;; project-gemini.el --- A project.el plugin -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2025 dickmao
 ;;
 ;; Author: dickmao
 ;; Version: 0.0.1
-;; URL: https://github.com/dickmao/project-claude
+;; URL: https://github.com/dickmao/project-gemini
 ;; Package-Requires: ((vterm "0.0.4"))
 
 ;; This file is not part of GNU Emacs.
@@ -22,19 +22,19 @@
 ;; You should have received a copy of the GNU General Public License
 ;; along with GNU Emacs.  If not, see <https://www.gnu.org/licenses/>.
 
-(defconst project-claude/prompt-regex "─+[^─]*>\\s-+" "Unfortunate.")
+(defconst project-gemini/prompt-regex "│\\s-*>\\s-+" "Gemini CLI prompt.")
 
-(defgroup project-claude nil
-  "Integration with Claude Code CLI."
+(defgroup project-gemini nil
+  "Integration with Gemini Code CLI."
   :group 'tools
-  :prefix "project-claude/")
+  :prefix "project-gemini/")
 
-(defcustom project-claude/invocation "npx @anthropic-ai/claude-code@latest"
+(defcustom project-gemini/invocation "npx @google/gemini-code@latest"
   "Command line shell invocation."
-  :group 'project-claude
+  :group 'project-gemini
   :type 'string)
 
-(require 'project-claude-generated)
+(require 'project-gemini-generated)
 
-(provide 'project-claude)
-;;; project-claude.el ends here
+(provide 'project-gemini)
+;;; project-gemini.el ends here

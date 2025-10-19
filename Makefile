@@ -3,8 +3,20 @@ EMACS ?= emacs
 ELSRC := $(shell git ls-files project*.el)
 TESTSRC := $(shell git ls-files test-*.el)
 
+project-claude-generated.el: template.el
+	sed -e 's/@PROVIDER@/claude/g' \
+	    -e 's/@PROVIDER_TITLE@/Claude/g' \
+	    -e 's/@CLEAR_INPUT_REGEX@/\\s-+──/g' \
+	    template.el > project-claude-generated.el
+
+project-gemini-generated.el: template.el
+	sed -e 's/@PROVIDER@/gemini/g' \
+	    -e 's/@PROVIDER_TITLE@/Gemini/g' \
+	    -e 's/@CLEAR_INPUT_REGEX@/\\s-+│/g' \
+	    template.el > project-gemini-generated.el
+
 .PHONY: compile
-compile: deps/archives/gnu/archive-contents
+compile: deps/archives/gnu/archive-contents project-claude-generated.el project-gemini-generated.el
 	$(EMACS) -batch \
 	  --eval "(setq byte-compile-error-on-warn t)" \
 	  --eval "(setq package-user-dir (expand-file-name \"deps\"))" \
@@ -68,6 +80,7 @@ deps/archives/gnu/archive-contents: emacs-libvterm/deps/archives/gnu/archive-con
 
 .PHONY: clean
 clean:
+	rm -f project-claude-generated.el project-gemini-generated.el
 	git clean -dffx # ff because emacs-libvterm has a git subdir
 
 .PHONY: install-emacs-libvterm
