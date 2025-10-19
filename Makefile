@@ -80,7 +80,6 @@ deps/archives/gnu/archive-contents: emacs-libvterm/deps/archives/gnu/archive-con
 
 .PHONY: clean
 clean:
-	rm -f project-claude-generated.el project-gemini-generated.el
 	git clean -dffx # ff because emacs-libvterm has a git subdir
 
 .PHONY: install-emacs-libvterm
