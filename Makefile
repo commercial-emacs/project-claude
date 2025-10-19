@@ -2,9 +2,13 @@ SHELL := /bin/bash
 EMACS ?= emacs
 ELSRC := $(shell git ls-files project*.el)
 TESTSRC := $(shell git ls-files test-project*.el)
+ELGEN := project-claude-generated.el project-gemini-generated.el
+TESTSRC := project-claude-generated.el project-gemini-generated.el
+TESTGEN := test-project-claude-generated.el test-project-gemini-generated.el
+
 
 .PHONY: compile
-compile: deps/archives/gnu/archive-contents project-claude-generated.el project-gemini-generated.el test-project-claude-generated.el test-project-gemini-generated.el
+compile: deps/archives/gnu/archive-contents $(ELGEN) $(TESTGEN)
 	$(EMACS) -batch \
 	  --eval "(setq byte-compile-error-on-warn t)" \
 	  --eval "(setq package-user-dir (expand-file-name \"deps\"))" \
@@ -41,23 +45,26 @@ test: compile
 .PHONY: dist-clean
 dist-clean:
 	( \
+	set -e; \
 	PKG_NAME=`$(EMACS) -batch -L . -l project-claude-package --eval "(princ (project-claude-package-name))"`; \
 	rm -rf $${PKG_NAME}; \
 	rm -rf $${PKG_NAME}.tar; \
 	)
 
 .PHONY: dist
-dist: dist-clean
+dist: dist-clean $(ELGEN)
 	$(EMACS) -batch -L . -l project-claude-package -f project-claude-package-inception
 	( \
+	set -e; \
 	PKG_NAME=`$(EMACS) -batch -L . -l project-claude-package --eval "(princ (project-claude-package-name))"`; \
-	rsync -R $(ELSRC) $${PKG_NAME} && \
+	rsync -R $(ELSRC) $(ELGEN) $${PKG_NAME} && \
 	tar cf $${PKG_NAME}.tar $${PKG_NAME}; \
 	)
 
 define install-recipe
 	$(MAKE) dist
 	( \
+	set -e; \
 	PKG_NAME=`$(EMACS) -batch -L . -l project-claude-package --eval "(princ (project-claude-package-name))"`; \
 	$(EMACS) --batch -l package --eval "(setq package-user-dir (expand-file-name $(1)))" \
 	  -f package-initialize \

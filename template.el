@@ -1,7 +1,10 @@
-;;; This is a template file for generating project-@PROVIDER@-generated.el
+;;; project-@PROVIDER@-generated.el --- @PROVIDER_TITLE@ -*- lexical-binding: t; -*-
 
 (require 'project)
 (require 'vterm)
+
+(defvar project-@PROVIDER@/prompt-regex)
+(defvar project-@PROVIDER@/invocation)
 
 ;;;###autoload
 (cl-defun project-@PROVIDER@ (&key no-solicit)

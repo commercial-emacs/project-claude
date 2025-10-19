@@ -1,6 +1,6 @@
 ;;; test-project-gemini.el --- Tests for project-gemini -*- lexical-binding: t; -*-
 
-;; Copyright (C) 2017-2020 by Lukas Fürmetz & Contributors
+;; Copyright (C) 2025 dickie smalls
 
 ;; This file is not part of GNU Emacs.
 
