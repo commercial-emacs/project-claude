@@ -3,9 +3,7 @@ EMACS ?= emacs
 ELSRC := $(shell git ls-files project*.el)
 TESTSRC := $(shell git ls-files test-project*.el)
 ELGEN := project-claude-generated.el project-gemini-generated.el
-TESTSRC := project-claude-generated.el project-gemini-generated.el
 TESTGEN := test-project-claude-generated.el test-project-gemini-generated.el
-
 
 .PHONY: compile
 compile: deps/archives/gnu/archive-contents $(ELGEN) $(TESTGEN)
