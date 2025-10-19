@@ -1,7 +1,7 @@
 SHELL := /bin/bash
 EMACS ?= emacs
-ELSRC := $(shell git ls-files project*.el | grep -v template.el)
-TESTSRC := $(shell git ls-files test-*.el | grep -v test-template.el)
+ELSRC := $(shell git ls-files project*.el)
+TESTSRC := $(shell git ls-files test-project*.el)
 
 .PHONY: compile
 compile: deps/archives/gnu/archive-contents project-claude-generated.el project-gemini-generated.el test-project-claude-generated.el test-project-gemini-generated.el
