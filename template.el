@@ -67,33 +67,6 @@ would if cold-starting from an in-band query)."
 	(and (listp prop)
 	     (eq value (plist-get prop :inverse-video))))))))
 
-(defun project-@PROVIDER@/clear-input ()
-  "Fraught."
-  (interactive)
-  (when vterm-copy-mode
-    (vterm-copy-mode-done))
-  (save-excursion
-    (goto-char (point-max))
-    (re-search-backward project-@PROVIDER@/prompt-regex nil t)
-    (catch 'done
-      (let (prev-cursor cursor)
-	(while (setq cursor (project-@PROVIDER@/cursor-pos))
-	  (when (equal prev-cursor cursor)
-	    (throw 'done nil))
-	  (setq prev-cursor cursor)
-	  (vterm-send-key "b" nil nil '(control))
-	  (setq this-command 'vterm-send-key)
-	  (accept-process-output vterm--process 0.05 nil t))))
-    (goto-char (project-@PROVIDER@/cursor-pos))
-    (catch 'done
-      (while t
-	(when (or (looking-at-p "@CLEAR_INPUT_REGEX@")
-		  (looking-at-p "Try "))
-	  (throw 'done nil))
-	(vterm-send-key "k" nil nil '(control))
-	(setq this-command 'vterm-send-key)
-	(accept-process-output vterm--process 0.05 nil t)))))
-
 (defun project-@PROVIDER@/issue-this (what)
   "You can send commands willy-nilly to bash.
 But something about @PROVIDER_TITLE@ Code's input processing interprets a too-soon

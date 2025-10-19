@@ -6,13 +6,11 @@ TESTSRC := $(shell git ls-files test-*.el)
 project-claude-generated.el: template.el
 	sed -e 's/@PROVIDER@/claude/g' \
 	    -e 's/@PROVIDER_TITLE@/Claude/g' \
-	    -e 's/@CLEAR_INPUT_REGEX@/\\s-+──/g' \
 	    template.el > project-claude-generated.el
 
 project-gemini-generated.el: template.el
 	sed -e 's/@PROVIDER@/gemini/g' \
 	    -e 's/@PROVIDER_TITLE@/Gemini/g' \
-	    -e 's/@CLEAR_INPUT_REGEX@/\\s-+│/g' \
 	    template.el > project-gemini-generated.el
 
 .PHONY: compile
