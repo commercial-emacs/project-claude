@@ -5,7 +5,7 @@
 
 ;;;###autoload
 (cl-defun project-@PROVIDER@ (&key no-solicit)
-  "Returns @PROVIDER_TITLE@ Code buffer for current project.
+  "Returns @PROVIDER_TITLE@ buffer for current project.
 
 Use NO-SOLICIT if wanting to avoid pre-startup questions (as one
 would if cold-starting from an in-band query)."
@@ -33,10 +33,10 @@ would if cold-starting from an in-band query)."
   "Keymap for `project-@PROVIDER@/prompt-mode'.")
 
 (define-derived-mode project-@PROVIDER@/prompt-mode text-mode "@PROVIDER_TITLE@-Prompt"
-  "Major mode for entering prompts to send to @PROVIDER_TITLE@ Code.
+  "Major mode for entering prompts to send to @PROVIDER_TITLE@.
 \\{project-@PROVIDER@/prompt-mode-map}"
   (setq header-line-format
-        "Enter prompt for @PROVIDER_TITLE@ Code. C-c C-c to send, C-c C-k to cancel"))
+        "Enter prompt for @PROVIDER_TITLE@. C-c C-c to send, C-c C-k to cancel"))
 
 (defun project-@PROVIDER@/prompt-cancel ()
   "Call it off."
@@ -69,7 +69,7 @@ would if cold-starting from an in-band query)."
 
 (defun project-@PROVIDER@/issue-this (what)
   "You can send commands willy-nilly to bash.
-But something about @PROVIDER_TITLE@ Code's input processing interprets a too-soon
+But something about @PROVIDER_TITLE@'s input processing interprets a too-soon
 RET as M-RET."
   (when (project-@PROVIDER@//wait-for project-@PROVIDER@/prompt-regex)
     (when vterm-copy-mode
@@ -85,7 +85,7 @@ RET as M-RET."
     ))
 
 (defun project-@PROVIDER@/prompt-send ()
-  "Send prompt buffer contents to @PROVIDER_TITLE@ Code and close prompt buffer."
+  "Send prompt buffer contents to @PROVIDER_TITLE@ and close prompt buffer."
   (interactive)
   (when-let ((prompt (buffer-substring-no-properties (point-min) (point-max)))
 	     (not-empty-p (not (string-empty-p (string-trim prompt)))))
@@ -96,7 +96,7 @@ RET as M-RET."
 
 ;;;###autoload
 (defun project-@PROVIDER@/prompt ()
-  "Open a prompt buffer to send queries to @PROVIDER_TITLE@ Code."
+  "Open a prompt buffer to send queries to @PROVIDER_TITLE@."
   (interactive)
   (when (> (length (window-list)) 2)
     (delete-other-windows))
@@ -110,7 +110,7 @@ RET as M-RET."
 			 (window-height . 5)))))
 
 (defun project-@PROVIDER@/file-reference ()
-  "Construct @PROVIDER_TITLE@ Code file reference from current position."
+  "Construct @PROVIDER_TITLE@ file reference from current position."
   (when-let ((file (buffer-file-name))
              (proj (project-current)))
     (let* ((rel-file (file-relative-name file (project-root proj)))
@@ -141,7 +141,7 @@ RET as M-RET."
 		#'escape-quotes-in-docstring))
 
 (define-minor-mode project-@PROVIDER@-mode
-  "Minor mode for @PROVIDER_TITLE@ Code integration."
+  "Minor mode for @PROVIDER_TITLE@ integration."
   :group 'project-@PROVIDER@
   :keymap (let ((map (make-sparse-keymap)))
             (define-key map (kbd "C-c '") #'project-@PROVIDER@/prompt)

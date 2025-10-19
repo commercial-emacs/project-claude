@@ -2,3 +2,5 @@
 /deps
 project-claude-generated.el
 project-gemini-generated.el
+test-project-claude-generated.el
+test-project-gemini-generated.el

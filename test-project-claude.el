@@ -17,20 +17,7 @@
 ;; You should have received a copy of the GNU General Public License
 ;; along with GNU Emacs.  If not, see <https://www.gnu.org/licenses/>.
 
-;;; Commentary:
-;;
-;; Tests for project-claude.
-
-;;; Code:
-
-(require 'ert)
-(require 'project-claude)
-
-(ert-deftest basic ()
-  (let* ((project-claude/invocation "echo foo && sleep 20")
-	 (buf (project-claude :no-solicit t)))
-    (should (eq buf (current-buffer)))
-    (should (project-claude//wait-for (regexp-quote "foo")))))
+(require 'test-project-claude-generated)
 
 (provide 'test-project-claude)
 ;;; test-project-claude.el ends here

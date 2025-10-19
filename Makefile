@@ -1,20 +1,10 @@
 SHELL := /bin/bash
 EMACS ?= emacs
-ELSRC := $(shell git ls-files project*.el)
-TESTSRC := $(shell git ls-files test-*.el)
-
-project-claude-generated.el: template.el
-	sed -e 's/@PROVIDER@/claude/g' \
-	    -e 's/@PROVIDER_TITLE@/Claude/g' \
-	    template.el > project-claude-generated.el
-
-project-gemini-generated.el: template.el
-	sed -e 's/@PROVIDER@/gemini/g' \
-	    -e 's/@PROVIDER_TITLE@/Gemini/g' \
-	    template.el > project-gemini-generated.el
+ELSRC := $(shell git ls-files project*.el | grep -v template.el)
+TESTSRC := $(shell git ls-files test-*.el | grep -v test-template.el)
 
 .PHONY: compile
-compile: deps/archives/gnu/archive-contents project-claude-generated.el project-gemini-generated.el
+compile: deps/archives/gnu/archive-contents project-claude-generated.el project-gemini-generated.el test-project-claude-generated.el test-project-gemini-generated.el
 	$(EMACS) -batch \
 	  --eval "(setq byte-compile-error-on-warn t)" \
 	  --eval "(setq package-user-dir (expand-file-name \"deps\"))" \
@@ -22,6 +12,24 @@ compile: deps/archives/gnu/archive-contents project-claude-generated.el project-
 	  -L . \
 	  -f batch-byte-compile $(ELSRC) $(TESTSRC); \
 	  (ret=$$? ; rm -f $(ELSRC:.el=.elc) $(TESTSRC:.el=.elc) && exit $$ret)
+
+project-claude-generated.el: template.el
+	sed -e 's/@PROVIDER@/claude/g' \
+	    -e 's/@PROVIDER_TITLE@/Claude Code/g' \
+	    template.el > project-claude-generated.el
+
+project-gemini-generated.el: template.el
+	sed -e 's/@PROVIDER@/gemini/g' \
+	    -e 's/@PROVIDER_TITLE@/Gemini CLI/g' \
+	    template.el > project-gemini-generated.el
+
+test-project-claude-generated.el: test-template.el
+	sed -e 's/@PROVIDER@/claude/g' \
+	    test-template.el > test-project-claude-generated.el
+
+test-project-gemini-generated.el: test-template.el
+	sed -e 's/@PROVIDER@/gemini/g' \
+	    test-template.el > test-project-gemini-generated.el
 
 .PHONY: test
 test: compile

@@ -1,4 +1,4 @@
-;;; test-project-gemini.el --- Tests for project-gemini -*- lexical-binding: t; -*-
+;;; test-project-@PROVIDER@-generated.el --- Tests for project-@PROVIDER@ -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2017-2020 by Lukas Fürmetz & Contributors
 
@@ -17,7 +17,20 @@
 ;; You should have received a copy of the GNU General Public License
 ;; along with GNU Emacs.  If not, see <https://www.gnu.org/licenses/>.
 
-(require 'test-project-gemini-generated)
+;;; Commentary:
+;;
+;; Tests for project-@PROVIDER@.
 
-(provide 'test-project-gemini)
-;;; test-project-gemini.el ends here
+;;; Code:
+
+(require 'ert)
+(require 'project-@PROVIDER@)
+
+(ert-deftest @PROVIDER@-basic ()
+  (let* ((project-@PROVIDER@/invocation "echo foo && sleep 20")
+	 (buf (project-@PROVIDER@ :no-solicit t)))
+    (should (eq buf (current-buffer)))
+    (should (project-@PROVIDER@//wait-for (regexp-quote "foo")))))
+
+(provide 'test-project-@PROVIDER@-generated)
+;;; test-project-@PROVIDER@-generated.el ends here
