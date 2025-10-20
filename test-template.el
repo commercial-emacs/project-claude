@@ -4,7 +4,8 @@
 (require 'project-@PROVIDER@)
 
 (ert-deftest @PROVIDER@-basic ()
-  (let* ((project-@PROVIDER@/invocation "echo foo && sleep 20")
+  (let* (vterm-mode-hook ;neutralize project-gemini/clear-on-startup
+	 (project-@PROVIDER@/invocation (format "echo foo && sleep 20"))
 	 (buf (project-@PROVIDER@ :no-solicit t)))
     (should (eq buf (current-buffer)))
     (should (project-@PROVIDER@//wait-for (regexp-quote "foo")))))
