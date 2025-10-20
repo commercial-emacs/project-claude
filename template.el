@@ -77,14 +77,16 @@ RET as M-RET."
   (when (project-@PROVIDER@//wait-for project-@PROVIDER@/prompt-regex)
     (when vterm-copy-mode
       (vterm-copy-mode-done))
-    ;;(project-@PROVIDER@/clear-input)
-    (let ((start (window-start)))
+    ;; a simple vterm-send-string followed by vterm-send-key of
+    ;; <return> results in newline-terminated string and no
+    ;; submission.
+    (dolist (letter (seq-map #'string what))
       (let ((inhibit-read-only t))
-	(vterm-send-string what))
-      (when (project-@PROVIDER@//wait-for (regexp-quote what) start)
-	(let ((inhibit-read-only t))
-	  (vterm-send-key "<return>"))
-	(setq this-command 'vterm-send-key))) ;for vterm--filter
+	(vterm-send-string letter))
+      (accept-process-output vterm--process 0.1))
+    (let ((inhibit-read-only t))
+      (vterm-send-key "<return>"))
+    (setq this-command 'vterm-send-key) ;for vterm--filter
     ))
 
 (defun project-@PROVIDER@/prompt-send ()
