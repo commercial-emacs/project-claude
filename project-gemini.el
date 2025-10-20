@@ -29,7 +29,7 @@
   :group 'tools
   :prefix "project-gemini/")
 
-(defcustom project-gemini/invocation "npx @google/gemini-code@latest"
+(defcustom project-gemini/invocation "npx @google/gemini-cli@latest"
   "Command line shell invocation."
   :group 'project-gemini
   :type 'string)

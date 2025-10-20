@@ -1,4 +1,4 @@
-;;; test-project-@PROVIDER@-generated.el --- Tests for project-@PROVIDER@ -*- lexical-binding: t; -*-
+;;; test-project-@PROVIDER@-generated.el --- do not edit -*- lexical-binding: t; -*-
 
 (require 'ert)
 (require 'project-@PROVIDER@)

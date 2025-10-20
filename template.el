@@ -1,4 +1,4 @@
-;;; project-@PROVIDER@-generated.el --- @PROVIDER_TITLE@ -*- lexical-binding: t; -*-
+;;; project-@PROVIDER@-generated.el --- do not edit -*- lexical-binding: t; -*-
 
 (require 'project)
 (require 'vterm)
@@ -6,7 +6,7 @@
 (defvar project-@PROVIDER@/prompt-regex)
 (defvar project-@PROVIDER@/invocation)
 
-;;;###autoload
+;;;###autoload (require 'project-@PROVIDER@)
 (cl-defun project-@PROVIDER@ (&key no-solicit)
   "Returns @PROVIDER_TITLE@ buffer for current project.
 
@@ -97,7 +97,7 @@ RET as M-RET."
       (cl-assert (eq buf (current-buffer)))
       (project-@PROVIDER@/issue-this prompt))))
 
-;;;###autoload
+;;;###autoload (require 'project-@PROVIDER@)
 (defun project-@PROVIDER@/prompt ()
   "Open a prompt buffer to send queries to @PROVIDER_TITLE@."
   (interactive)
@@ -150,7 +150,7 @@ RET as M-RET."
             (define-key map (kbd "C-c '") #'project-@PROVIDER@/prompt)
             map))
 
-;;;###autoload
+;;;###autoload (require 'project-@PROVIDER@)
 (define-globalized-minor-mode global-project-@PROVIDER@-mode
   project-@PROVIDER@-mode (lambda ()
 			(when (derived-mode-p 'prog-mode)
