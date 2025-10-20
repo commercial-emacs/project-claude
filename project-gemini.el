@@ -36,5 +36,16 @@
 
 (require 'project-gemini-generated)
 
+(defun project-gemini/clear-on-startup ()
+  "Clear errant ANSI terminal query response at gemini startup."
+  (when (and (string-match-p "\\*gemini-" (buffer-name))
+	     (project-gemini//wait-for project-gemini/prompt-regex))
+    (vterm-send-key "a" nil nil t)
+    (vterm-send-key "k" nil nil t)
+    (setq this-command 'vterm-send-key) ;for vterm--filter
+    ))
+
+(add-hook 'vterm-mode-hook #'project-gemini/clear-on-startup)
+
 (provide 'project-gemini)
 ;;; project-gemini.el ends here
