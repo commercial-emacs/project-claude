@@ -5,9 +5,9 @@ Install
 git clone https://github.com/commercial-emacs/project-claude.git
 make -C project-claude install
 
-------------------------------------------------
+-----
 Usage
-------------------------------------------------
+-----
 M-x project-claude
 M-x project-gemini
 
