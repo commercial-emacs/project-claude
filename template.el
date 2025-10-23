@@ -80,10 +80,19 @@ RET as M-RET."
     ;; a simple vterm-send-string followed by vterm-send-key of
     ;; <return> results in newline-terminated string and no
     ;; submission.
-    (dolist (letter (seq-map #'string what))
+    (let ((start-time (current-time))
+	  (search-limit
+	   (save-excursion
+             (goto-char (point-max))
+             (re-search-backward project-@PROVIDER@/prompt-regex nil t)))
+	  (last-line (car (last (split-string what "\n")))))
       (let ((inhibit-read-only t))
-	(vterm-send-string letter))
-      (accept-process-output vterm--process 0.1))
+        (vterm-send-string what))
+      (cl-loop repeat 150
+               until (save-excursion
+                       (goto-char (point-max))
+                       (search-backward last-line search-limit t))
+               do (accept-process-output vterm--process 0.02)))
     (let ((inhibit-read-only t))
       (vterm-send-key "<return>"))
     (setq this-command 'vterm-send-key) ;for vterm--filter
