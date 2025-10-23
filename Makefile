@@ -91,8 +91,7 @@ clean: dist-clean
 	git clean -dffX # ff because emacs-libvterm has a git subdir
 
 .PHONY: install-emacs-libvterm
-install-emacs-libvterm:
-	$(MAKE) emacs-libvterm/vterm.el
+install-emacs-libvterm: emacs-libvterm/vterm.el
 	$(MAKE) -C emacs-libvterm INSTALLDIR=$(INSTALLDIR) install
 
 .PHONY: install
@@ -100,5 +99,5 @@ install:
 	2>/dev/null @$(EMACS) --batch -f package-initialize -l vterm \
 	  --eval "(or (version-list-<= '(0 0 4) \
 	   (package-desc-version (car (alist-get 'vterm package-alist)))) \
-	   (error))" || $(MAKE) install-emacs-libvterm
+	   (error))" || $(MAKE) INSTALLDIR=$(INSTALLDIR) install-emacs-libvterm
 	$(call install-recipe,$(INSTALLDIR))
