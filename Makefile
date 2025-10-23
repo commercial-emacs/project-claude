@@ -93,7 +93,7 @@ clean: dist-clean
 .PHONY: install-emacs-libvterm
 install-emacs-libvterm:
 	$(MAKE) emacs-libvterm/vterm.el
-	$(MAKE) -C emacs-libvterm install
+	$(MAKE) -C emacs-libvterm INSTALLDIR=$(INSTALLDIR) install
 
 .PHONY: install
 install:
