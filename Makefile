@@ -87,7 +87,7 @@ deps/archives/gnu/archive-contents: emacs-libvterm/deps/archives/gnu/archive-con
 	rm -rf deps/project-claude* # just keep deps
 
 .PHONY: clean
-clean:
+clean: dist-clean
 	git clean -dffX # ff because emacs-libvterm has a git subdir
 
 .PHONY: install-emacs-libvterm
