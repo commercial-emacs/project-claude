@@ -88,7 +88,7 @@ deps/archives/gnu/archive-contents: emacs-libvterm/deps/archives/gnu/archive-con
 
 .PHONY: clean
 clean:
-	git clean -dffx # ff because emacs-libvterm has a git subdir
+	git clean -dffX # ff because emacs-libvterm has a git subdir
 
 .PHONY: install-emacs-libvterm
 install-emacs-libvterm:
