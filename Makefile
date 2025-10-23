@@ -63,13 +63,15 @@ define install-recipe
 	$(MAKE) dist
 	( \
 	set -e; \
+	INSTALL_PATH=$(1); \
+	if [[ "$${INSTALL_PATH}" == /* ]]; then INSTALL_PATH=\"$${INSTALL_PATH}\"; fi; \
 	PKG_NAME=`$(EMACS) -batch -L . -l project-claude-package --eval "(princ (project-claude-package-name))"`; \
-	$(EMACS) --batch -l package --eval "(setq package-user-dir (expand-file-name $(1)))" \
+	$(EMACS) --batch -l package --eval "(setq package-user-dir (expand-file-name $${INSTALL_PATH}))" \
 	  -f package-initialize \
 	  --eval "(ignore-errors (apply (function package-delete) (alist-get (quote project-claude) package-alist)))" \
 	  -f package-refresh-contents \
 	  --eval "(package-install-file \"$${PKG_NAME}.tar\")"; \
-	PKG_DIR=`$(EMACS) -batch -l package --eval "(setq package-user-dir (expand-file-name $(1)))" -f package-initialize --eval "(princ (package-desc-dir (car (alist-get 'project-claude package-alist))))"`; \
+	PKG_DIR=`$(EMACS) -batch -l package --eval "(setq package-user-dir (expand-file-name $${INSTALL_PATH}))" -f package-initialize --eval "(princ (package-desc-dir (car (alist-get 'project-claude package-alist))))"`; \
 	)
 	$(MAKE) dist-clean
 endef
@@ -83,7 +85,7 @@ emacs-libvterm/deps/archives/gnu/archive-contents: emacs-libvterm/vterm.el
 	$(MAKE) -C emacs-libvterm INSTALLDIR=\\\"../deps\\\" install
 
 deps/archives/gnu/archive-contents: emacs-libvterm/deps/archives/gnu/archive-contents
-	$(call install-recipe,\"deps\")
+	$(call install-recipe,$(CURDIR)/deps)
 	rm -rf deps/project-claude* # just keep deps
 
 .PHONY: clean

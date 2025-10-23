@@ -80,8 +80,7 @@ RET as M-RET."
     ;; a simple vterm-send-string followed by vterm-send-key of
     ;; <return> results in newline-terminated string and no
     ;; submission.
-    (let ((start-time (current-time))
-	  (search-limit
+    (let ((search-limit
 	   (save-excursion
              (goto-char (point-max))
              (re-search-backward project-@PROVIDER@/prompt-regex nil t)))
@@ -92,7 +91,7 @@ RET as M-RET."
                until (save-excursion
                        (goto-char (point-max))
                        (search-backward last-line search-limit t))
-               do (accept-process-output vterm--process 0.02)))
+               do (accept-process-output nil 0.02)))
     (let ((inhibit-read-only t))
       (vterm-send-key "<return>"))
     (setq this-command 'vterm-send-key) ;for vterm--filter
@@ -101,11 +100,14 @@ RET as M-RET."
 (defun project-@PROVIDER@/prompt-send ()
   "Send prompt buffer contents to @PROVIDER_TITLE@ and close prompt buffer."
   (interactive)
+  (when-let ((source-buf (window-buffer (get-mru-window nil nil t))))
+    (deactivate-mark))
   (when-let ((prompt (buffer-substring-no-properties (point-min) (point-max)))
 	     (not-empty-p (not (string-empty-p (string-trim prompt)))))
     (quit-window t)
     (let ((buf (project-@PROVIDER@ :no-solicit t)))
       (cl-assert (eq buf (current-buffer)))
+
       (project-@PROVIDER@/issue-this prompt))))
 
 ;;;###autoload (require 'project-@PROVIDER@)
