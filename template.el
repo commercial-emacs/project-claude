@@ -101,13 +101,13 @@ RET as M-RET."
   "Send prompt buffer contents to @PROVIDER_TITLE@ and close prompt buffer."
   (interactive)
   (when-let ((source-buf (window-buffer (get-mru-window nil nil t))))
-    (deactivate-mark))
+    (with-current-buffer source-buf
+      (deactivate-mark)))
   (when-let ((prompt (buffer-substring-no-properties (point-min) (point-max)))
 	     (not-empty-p (not (string-empty-p (string-trim prompt)))))
     (quit-window t)
     (let ((buf (project-@PROVIDER@ :no-solicit t)))
       (cl-assert (eq buf (current-buffer)))
-
       (project-@PROVIDER@/issue-this prompt))))
 
 ;;;###autoload (require 'project-@PROVIDER@)
