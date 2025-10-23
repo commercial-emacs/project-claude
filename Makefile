@@ -79,12 +79,11 @@ endef
 emacs-libvterm/vterm.el:
 	git clone --depth 1 https://github.com/commercial-emacs/emacs-libvterm.git
 
-# I'd use a vterm-specific filename but I don't want to hardcode version
-emacs-libvterm/deps/archives/gnu/archive-contents: emacs-libvterm/vterm.el
+emacs-libvterm/vterm-module.so: emacs-libvterm/vterm.el
 	rm -rf deps
-	$(MAKE) -C emacs-libvterm INSTALLDIR=\\\"../deps\\\" install
+	$(MAKE) -C emacs-libvterm INSTALLDIR=$(CURDIR)/deps install
 
-deps/archives/gnu/archive-contents: emacs-libvterm/deps/archives/gnu/archive-contents
+deps/archives/gnu/archive-contents: emacs-libvterm/vterm-module.so
 	$(call install-recipe,$(CURDIR)/deps)
 	rm -rf deps/project-claude* # just keep deps
 
