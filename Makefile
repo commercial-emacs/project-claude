@@ -4,7 +4,7 @@ ELSRC := $(shell git ls-files project*.el)
 TESTSRC := $(shell git ls-files test-project*.el)
 ELGEN := project-claude-generated.el project-gemini-generated.el
 TESTGEN := test-project-claude-generated.el test-project-gemini-generated.el
-
+INSTALLDIR ?= package-user-dir
 .PHONY: compile
 compile: deps/archives/gnu/archive-contents $(ELGEN) $(TESTGEN)
 	$(EMACS) -batch \
@@ -78,12 +78,9 @@ emacs-libvterm/vterm.el:
 	git clone --depth 1 https://github.com/commercial-emacs/emacs-libvterm.git
 
 # I'd use a vterm-specific filename but I don't want to hardcode version
-emacs-libvterm/deps/archives/gnu/archive-contents:
+emacs-libvterm/deps/archives/gnu/archive-contents: emacs-libvterm/vterm.el
 	rm -rf deps
-	$(MAKE) emacs-libvterm/vterm.el
-	$(MAKE) -C emacs-libvterm deps/archives/gnu/archive-contents
-	mkdir -p deps
-	cp -pr emacs-libvterm/deps/vterm* deps/
+	$(MAKE) -C emacs-libvterm INSTALLDIR=\\\"../deps\\\" install
 
 deps/archives/gnu/archive-contents: emacs-libvterm/deps/archives/gnu/archive-contents
 	$(call install-recipe,\"deps\")
@@ -104,4 +101,4 @@ install:
 	  --eval "(or (version-list-<= '(0 0 4) \
 	   (package-desc-version (car (alist-get 'vterm package-alist)))) \
 	   (error))" || $(MAKE) install-emacs-libvterm
-	$(call install-recipe,package-user-dir)
+	$(call install-recipe,$(INSTALLDIR))
