@@ -97,7 +97,7 @@ install-emacs-libvterm: emacs-libvterm/vterm.el
 
 .PHONY: install
 install:
-	2>/dev/null @$(EMACS) --batch -f package-initialize -l vterm \
+	@2>/dev/null $(EMACS) --batch -f package-initialize -l vterm \
 	  --eval "(or (version-list-<= '(0 0 4) \
 	   (package-desc-version (car (alist-get 'vterm package-alist)))) \
 	   (error))" || $(MAKE) INSTALLDIR=$(INSTALLDIR) install-emacs-libvterm
