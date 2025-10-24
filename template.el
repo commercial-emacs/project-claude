@@ -6,6 +6,27 @@
 (defvar project-@PROVIDER@/prompt-regex)
 (defvar project-@PROVIDER@/invocation)
 
+(cl-defun project-@PROVIDER@/get-buffer (&key no-solicit)
+  "Get or create @PROVIDER_TITLE@ buffer for current project.
+
+Use NO-SOLICIT if wanting to avoid pre-startup questions (as one
+would if cold-starting from an in-band query)."
+  (when-let ((proj (if (fboundp 'project-most-recent-project)
+                       (funcall 'project-most-recent-project)
+                     (project-current)))
+	     (default-directory (project-root proj))
+	     (vterm-shell
+	      (format "/bin/sh -c '%s'"
+		      (concat (when no-solicit
+				"DISABLE_TELEMETRY=1 DISABLE_AUTOUPDATER=1 ")
+			      project-@PROVIDER@/invocation)))
+	     (buf (get-buffer-create (format "*@PROVIDER@-%s*" (project-name proj)))))
+    (prog1 buf
+      (with-current-buffer buf
+	(when (or (not vterm--term)
+		  (not (process-live-p vterm--process)))
+	  (vterm-mode))))))
+
 ;;;###autoload (require 'project-@PROVIDER@)
 (cl-defun project-@PROVIDER@ (&key no-solicit)
   "Returns @PROVIDER_TITLE@ buffer for current project.
@@ -13,20 +34,8 @@
 Use NO-SOLICIT if wanting to avoid pre-startup questions (as one
 would if cold-starting from an in-band query)."
   (interactive)
-  (when-let ((proj (if (fboundp 'project-most-recent-project)
-                       (funcall 'project-most-recent-project)
-                     (project-current)))
-	     (default-directory (project-root proj))
-	     (buf (get-buffer-create (format "*@PROVIDER@-%s*" (project-name proj)))))
-    (if (with-current-buffer buf (and vterm--term (process-live-p vterm--process)))
-	(pop-to-buffer buf '((display-buffer-use-some-window) . ((some-window . mru))))
-      (let ((vterm-shell
-	     (format "/bin/sh -c '%s'"
-		     (concat (when no-solicit
-			       "DISABLE_TELEMETRY=1 DISABLE_AUTOUPDATER=1 ")
-			     project-@PROVIDER@/invocation)))
-	    (vterm-buffer-name (buffer-name buf)))
-	(vterm-other-window)))))
+  (when-let ((buf (project-@PROVIDER@/get-buffer :no-solicit no-solicit)))
+    (pop-to-buffer buf '((display-buffer-use-some-window) . ((some-window . mru))))))
 
 (defvar project-@PROVIDER@/prompt-mode-map
   (let ((map (make-sparse-keymap)))
@@ -84,14 +93,16 @@ RET as M-RET."
 	   (save-excursion
              (goto-char (point-max))
              (re-search-backward project-@PROVIDER@/prompt-regex nil t)))
-	  (last-line (car (last (split-string what "\n")))))
+	  (last-line (cl-loop for line in (reverse (split-string what "\n"))
+			      when (not (string-empty-p (string-trim line)))
+			      return line)))
       (let ((inhibit-read-only t))
         (vterm-send-string what))
       (cl-loop repeat 150
                until (save-excursion
                        (goto-char (point-max))
                        (search-backward last-line search-limit t))
-               do (accept-process-output nil 0.02)))
+               do (accept-process-output vterm--process 0.02)))
     (let ((inhibit-read-only t))
       (vterm-send-key "<return>"))
     (setq this-command 'vterm-send-key) ;for vterm--filter
