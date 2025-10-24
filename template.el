@@ -79,10 +79,8 @@ would if cold-starting from an in-band query)."
 	(and (listp prop)
 	     (eq value (plist-get prop :inverse-video))))))))
 
-(defun project-@PROVIDER@/issue-this (what)
-  "You can send commands willy-nilly to bash.
-But something about @PROVIDER_TITLE@'s input processing interprets a too-soon
-RET as M-RET."
+(defun project-@PROVIDER@/say (what)
+  "Say WHAT."
   (when (project-@PROVIDER@//wait-for project-@PROVIDER@/prompt-regex)
     (when vterm-copy-mode
       (vterm-copy-mode-done))
@@ -119,7 +117,7 @@ RET as M-RET."
     (quit-window t)
     (let ((buf (project-@PROVIDER@ :no-solicit t)))
       (cl-assert (eq buf (current-buffer)))
-      (project-@PROVIDER@/issue-this prompt))))
+      (project-@PROVIDER@/say prompt))))
 
 ;;;###autoload (require 'project-@PROVIDER@)
 (defun project-@PROVIDER@/prompt ()
