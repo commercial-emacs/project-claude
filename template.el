@@ -92,7 +92,7 @@ would if cold-starting from an in-band query)."
 
 (defun project-@PROVIDER@/say (what)
   "Say WHAT."
-  (project-@PROVIDER@/ensure
+  (project-@PROVIDER@/ensure-ready
     ;; a simple vterm-send-string followed by vterm-send-key of
     ;; <return> results in newline-terminated string and no
     ;; submission.
