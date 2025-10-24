@@ -101,7 +101,7 @@ install:
 	set -e; \
 	INSTALL_PATH=$(INSTALLDIR); \
 	if [[ "$${INSTALL_PATH}" == /* ]]; then INSTALL_PATH=\"$${INSTALL_PATH}\"; fi; \
-	2>/dev/null $(EMACS) --batch \
+	1>/dev/null 2>/dev/null $(EMACS) --batch \
 	  --eval "(setq package-user-dir (expand-file-name $${INSTALL_PATH}))" \
 	  -f package-initialize -l vterm \
 	  --eval "(or (version-list-<= '(0 0 4) \
