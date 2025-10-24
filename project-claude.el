@@ -31,7 +31,7 @@
   :group 'tools
   :prefix "project-claude/")
 
-(defcustom project-claude/invocation "npx @anthropic-ai/claude-code@latest"
+(defcustom project-claude/invocation "claude"
   "Command line shell invocation."
   :group 'project-claude
   :type 'string)

@@ -31,7 +31,7 @@
   :group 'tools
   :prefix "project-gemini/")
 
-(defcustom project-gemini/invocation "npx @google/gemini-cli@latest"
+(defcustom project-gemini/invocation "gemini"
   "Command line shell invocation."
   :group 'project-gemini
   :type 'string)
