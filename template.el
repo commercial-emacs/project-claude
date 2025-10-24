@@ -96,7 +96,7 @@ would if cold-starting from an in-band query)."
     ;; a simple vterm-send-string followed by vterm-send-key of
     ;; <return> results in newline-terminated string and no
     ;; submission.
-    (let ((search-limit
+    (let ((from
 	   (save-excursion
              (goto-char (point-max))
              (re-search-backward project-@PROVIDER@/prompt-regex nil t)))
@@ -105,11 +105,9 @@ would if cold-starting from an in-band query)."
 			      return line)))
       (let ((inhibit-read-only t))
         (vterm-send-string what))
-      (cl-loop repeat 150
-	       until (save-excursion
-		       (goto-char (point-max))
-		       (search-backward last-line search-limit t))
-	       do (accept-process-output vterm--process 0.02)))
+      (project-claude//wait-for (regexp-quote last-line)
+				:from from
+				:timeout 3))
     (let ((inhibit-read-only t))
       (vterm-send-key "<return>"))
     (setq this-command 'vterm-send-key) ;for vterm--filter
