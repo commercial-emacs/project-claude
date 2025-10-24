@@ -24,6 +24,8 @@
 
 (defconst project-claude/prompt-regex "─+[^─]*>\\s-+" "Unfortunate.")
 
+(defconst project-claude/response-regex "^●")
+
 (defgroup project-claude nil
   "Integration with Claude Code CLI."
   :group 'tools

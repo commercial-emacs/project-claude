@@ -97,8 +97,15 @@ install-emacs-libvterm: emacs-libvterm/vterm.el
 
 .PHONY: install
 install:
-	@2>/dev/null $(EMACS) --batch -f package-initialize -l vterm \
+	( \
+	set -e; \
+	INSTALL_PATH=$(INSTALLDIR); \
+	if [[ "$${INSTALL_PATH}" == /* ]]; then INSTALL_PATH=\"$${INSTALL_PATH}\"; fi; \
+	2>/dev/null $(EMACS) --batch \
+	  --eval "(setq package-user-dir (expand-file-name $${INSTALL_PATH}))" \
+	  -f package-initialize -l vterm \
 	  --eval "(or (version-list-<= '(0 0 4) \
 	   (package-desc-version (car (alist-get 'vterm package-alist)))) \
-	   (error))" || $(MAKE) INSTALLDIR=$(INSTALLDIR) install-emacs-libvterm
+	   (error))" || $(MAKE) INSTALLDIR=$(INSTALLDIR) install-emacs-libvterm \
+	)
 	$(call install-recipe,$(INSTALLDIR))

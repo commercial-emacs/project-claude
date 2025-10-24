@@ -6,6 +6,15 @@
 (defvar project-@PROVIDER@/prompt-regex)
 (defvar project-@PROVIDER@/invocation)
 
+(defmacro project-@PROVIDER@/ensure-ready (&rest body)
+  (declare (indent 0))
+  `(with-current-buffer (or (project-@PROVIDER@/get-buffer :no-solicit t)
+			    (error "project-claude/get-buffer failed"))
+     (when (project-@PROVIDER@//wait-for project-@PROVIDER@/prompt-regex)
+       (when vterm-copy-mode
+	 (vterm-copy-mode-done))
+       ,@body)))
+
 (cl-defun project-@PROVIDER@/get-buffer (&key no-solicit)
   "Get or create @PROVIDER_TITLE@ buffer for current project.
 
@@ -55,19 +64,21 @@ would if cold-starting from an in-band query)."
   (interactive)
   (quit-window t))
 
-(defun project-@PROVIDER@//wait-for (regex &optional from)
+(cl-defun project-@PROVIDER@//wait-for (regex &key
+					(from (point-min))
+					(timeout 10)
+					(absence))
   "Return t on success."
-  (save-excursion
-    (goto-char (or from (point-min)))
-    (cl-loop with success
-	     repeat 200
-	     until (setq success (save-excursion
-				   (goto-char (or from (point-min)))
-				   (re-search-forward regex nil t)))
-	     do (accept-process-output vterm--process 0.05 nil t)
-	     finally return success)))
+  (cl-loop with success
+	   repeat (truncate (/ timeout .05))
+	   until (setq success (save-excursion
+				 (goto-char from)
+				 (funcall (if absence #'not #'identity)
+					  (re-search-forward regex nil t))))
+	   do (accept-process-output vterm--process 0.05 nil t)
+	   finally return success))
 
-(defun project-@PROVIDER@/cursor-pos ()
+(defun project-@PROVIDER@//cursor-pos ()
   (save-excursion
     (goto-char (point-max))
     (re-search-backward project-@PROVIDER@/prompt-regex nil t)
@@ -81,9 +92,7 @@ would if cold-starting from an in-band query)."
 
 (defun project-@PROVIDER@/say (what)
   "Say WHAT."
-  (when (project-@PROVIDER@//wait-for project-@PROVIDER@/prompt-regex)
-    (when vterm-copy-mode
-      (vterm-copy-mode-done))
+  (project-@PROVIDER@/ensure
     ;; a simple vterm-send-string followed by vterm-send-key of
     ;; <return> results in newline-terminated string and no
     ;; submission.
@@ -97,10 +106,10 @@ would if cold-starting from an in-band query)."
       (let ((inhibit-read-only t))
         (vterm-send-string what))
       (cl-loop repeat 150
-               until (save-excursion
-                       (goto-char (point-max))
-                       (search-backward last-line search-limit t))
-               do (accept-process-output vterm--process 0.02)))
+	       until (save-excursion
+		       (goto-char (point-max))
+		       (search-backward last-line search-limit t))
+	       do (accept-process-output vterm--process 0.02)))
     (let ((inhibit-read-only t))
       (vterm-send-key "<return>"))
     (setq this-command 'vterm-send-key) ;for vterm--filter

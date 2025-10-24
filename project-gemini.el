@@ -24,6 +24,8 @@
 
 (defconst project-gemini/prompt-regex "│\\s-*>\\s-+" "Gemini CLI prompt.")
 
+(defconst project-gemini/response-regex "^✦")
+
 (defgroup project-gemini nil
   "Integration with Gemini Code CLI."
   :group 'tools
