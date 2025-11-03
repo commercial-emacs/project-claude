@@ -93,25 +93,37 @@ would if cold-starting from an in-band query)."
 (defun project-@PROVIDER@/say (what)
   "Say WHAT."
   (project-@PROVIDER@/ensure-ready
-    ;; a simple vterm-send-string followed by vterm-send-key of
-    ;; <return> results in newline-terminated string and no
-    ;; submission.
-    (let ((from
-	   (save-excursion
-             (goto-char (point-max))
-             (re-search-backward project-@PROVIDER@/prompt-regex nil t)))
-	  (last-line (cl-loop for line in (reverse (split-string what "\n"))
-			      when (not (string-empty-p (string-trim line)))
-			      return line)))
-      (let ((inhibit-read-only t))
-        (vterm-send-string what))
-      (project-claude//wait-for (regexp-quote last-line)
-				:from from
-				:timeout 3))
-    (let ((inhibit-read-only t))
-      (vterm-send-key "<return>"))
-    (setq this-command 'vterm-send-key) ;for vterm--filter
-    ))
+   ;; a simple vterm-send-string followed by vterm-send-key of
+   ;; <return> results in newline-terminated string and no
+   ;; submission.
+   (let ((from (save-excursion
+		 (goto-char (point-max))
+		 (re-search-backward project-@PROVIDER@/prompt-regex nil t)))
+	 (last-line (cl-loop for line in (reverse (split-string what "\n"))
+			     when (not (string-empty-p (string-trim line)))
+			     return line))
+	 (mash (lambda (f)
+		 ;; PREVIOUS should be initialized to cursor-pos.
+		 ;; But need to go round at least twice else no-worky.
+		 (cl-loop with previous
+			  do (funcall f)
+			  do (accept-process-output vterm--process 0.05 nil t)
+			  for current = (project-@PROVIDER@//cursor-pos)
+			  until (equal previous current)
+			  do (setq previous current)))))
+     (let ((inhibit-read-only t))
+       ;; best effort to clear any residual crap before sending
+       (funcall mash (apply-partially #'vterm-send-key "<down>"))
+       (funcall mash (apply-partially #'vterm-send-key "e" nil nil :ctrl))
+       (funcall mash (apply-partially #'vterm-send-key "<backspace>"))
+       (vterm-send-string what))
+     (project-claude//wait-for (regexp-quote last-line)
+			       :from from
+			       :timeout 3))
+   (let ((inhibit-read-only t))
+     (vterm-send-key "<return>"))
+   (setq this-command 'vterm-send-key)	;for vterm--filter
+   ))
 
 (defun project-@PROVIDER@/prompt-send ()
   "Send prompt buffer contents to @PROVIDER_TITLE@ and close prompt buffer."
