@@ -82,13 +82,13 @@ would if cold-starting from an in-band query)."
   (save-excursion
     (goto-char (point-max))
     (re-search-backward project-@PROVIDER@/prompt-regex nil t)
-    (prop-match-beginning
-     (text-property-search-forward
-      'font-lock-face t
-      (lambda (value prop)
-	"What asshole wrote and documented t-p-s-f."
-	(and (listp prop)
-	     (eq value (plist-get prop :inverse-video))))))))
+    (when-let ((x (text-property-search-forward
+		   'font-lock-face t
+		   (lambda (value prop)
+		     "What asshole wrote and documented t-p-s-f."
+		     (and (listp prop)
+			  (eq value (plist-get prop :inverse-video)))))))
+      (prop-match-beginning x))))
 
 (defun project-@PROVIDER@/say (what)
   "Say WHAT."
