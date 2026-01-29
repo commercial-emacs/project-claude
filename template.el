@@ -149,7 +149,7 @@ would if cold-starting from an in-band query)."
     (with-current-buffer buf
       (project-@PROVIDER@/prompt-mode)
       (erase-buffer)
-      (when file-ref (insert file-ref " ")))
+      (when file-ref (insert (format "\"%s\"" file-ref) " ")))
     (pop-to-buffer buf '((display-buffer-at-bottom)
 			 (window-height . 5)))))
 
