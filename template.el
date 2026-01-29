@@ -9,7 +9,7 @@
 (defmacro project-@PROVIDER@/ensure-ready (&rest body)
   (declare (indent 0))
   `(with-current-buffer (or (project-@PROVIDER@/get-buffer :no-solicit t)
-			    (error "project-claude/get-buffer failed"))
+			    (error "project-@PROVIDER@/get-buffer failed"))
      (when (project-@PROVIDER@//wait-for project-@PROVIDER@/prompt-regex)
        (when vterm-copy-mode
 	 (vterm-copy-mode-done))
@@ -117,10 +117,10 @@ would if cold-starting from an in-band query)."
        (funcall mash (apply-partially #'vterm-send-key "e" nil nil :ctrl))
        (funcall mash (apply-partially #'vterm-send-key "<backspace>"))
        (vterm-send-string what))
-     (project-claude//wait-for (regexp-quote last-line)
-			       :from from
-			       :timeout 3))
+     (project-@PROVIDER@//wait-for (regexp-quote last-line)
+				   :from from))
    (let ((inhibit-read-only t))
+     (sleep-for 0.5)
      (vterm-send-key "<return>"))
    (setq this-command 'vterm-send-key)	;for vterm--filter
    ))
