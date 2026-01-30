@@ -120,7 +120,6 @@ would if cold-starting from an in-band query)."
      (project-@PROVIDER@//wait-for (regexp-quote last-line)
 				   :from from))
    (let ((inhibit-read-only t))
-     (sleep-for 0.5)
      (vterm-send-key "<return>"))
    (setq this-command 'vterm-send-key)	;for vterm--filter
    ))
