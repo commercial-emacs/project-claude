@@ -117,7 +117,9 @@ would if cold-starting from an in-band query)."
        (funcall mash (apply-partially #'vterm-send-key "e" nil nil :ctrl))
        (funcall mash (apply-partially #'vterm-send-key "<backspace>"))
        (vterm-send-string what))
-     (project-@PROVIDER@//wait-for (regexp-quote last-line)
+     (project-@PROVIDER@//wait-for (replace-regexp-in-string
+				    "[[:space:]]+" "\\\\s-+"
+				    (regexp-quote last-line))
 				   :from from))
    (let ((inhibit-read-only t))
      (vterm-send-key "<return>"))
