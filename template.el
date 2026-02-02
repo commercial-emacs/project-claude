@@ -71,6 +71,7 @@ would if cold-starting from an in-band query)."
   "Return t on success."
   (cl-loop with success
 	   repeat (truncate (/ timeout .05))
+	   do (redisplay)
 	   until (setq success (save-excursion
 				 (goto-char from)
 				 (funcall (if absence #'not #'identity)
