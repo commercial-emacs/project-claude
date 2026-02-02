@@ -117,14 +117,16 @@ would if cold-starting from an in-band query)."
        (funcall mash (apply-partially #'vterm-send-key "e" nil nil :ctrl))
        (funcall mash (apply-partially #'vterm-send-key "<backspace>"))
        (vterm-send-string (format "\"%s\"" what)))
-     (project-@PROVIDER@//wait-for (replace-regexp-in-string
-				    "[[:space:]]+" "\\\\s-+"
-				    (regexp-quote last-line))
-				   :from from))
-   (let ((inhibit-read-only t))
-     (vterm-send-key "<return>"))
-   (setq this-command 'vterm-send-key)	;for vterm--filter
-   ))
+     (if (project-@PROVIDER@//wait-for (replace-regexp-in-string
+					"[[:space:]]+" "\\\\s-+"
+					(regexp-quote last-line))
+				       :from from)
+	 (progn
+	   (let ((inhibit-read-only t))
+	     (vterm-send-key "<return>"))
+	   ;; for vterm--filter
+	   (setq this-command 'vterm-send-key))
+       (error "Could not project-@PROVIDER@/say")))))
 
 (defun project-@PROVIDER@/prompt-send ()
   "Send prompt buffer contents to @PROVIDER_TITLE@ and close prompt buffer."
