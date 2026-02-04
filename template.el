@@ -20,21 +20,23 @@
 
 Use NO-SOLICIT if wanting to avoid pre-startup questions (as one
 would if cold-starting from an in-band query)."
-  (when-let ((proj (if (fboundp 'project-most-recent-project)
-                       (funcall 'project-most-recent-project)
-                     (project-current)))
-	     (default-directory (project-root proj))
-	     (vterm-shell
-	      (format "/bin/sh -c '%s'"
-		      (concat (when no-solicit
-				"DISABLE_TELEMETRY=1 DISABLE_AUTOUPDATER=1 ")
-			      project-@PROVIDER@/invocation)))
-	     (buf (get-buffer-create (format "*@PROVIDER@-%s*" (project-name proj)))))
-    (prog1 buf
-      (with-current-buffer buf
-	(when (or (not vterm--term)
-		  (not (process-live-p vterm--process)))
-	  (vterm-mode))))))
+  (let ((proj (if (fboundp 'project-most-recent-project)
+                  (funcall 'project-most-recent-project)
+                (project-current))))
+    (if (and (consp proj) (eq (car proj) 'transient))
+	(user-error "Avoid running with no project")
+      (when-let ((default-directory (project-root proj))
+		 (vterm-shell
+		  (format "/bin/sh -c '%s'"
+			  (concat (when no-solicit
+				    "DISABLE_TELEMETRY=1 DISABLE_AUTOUPDATER=1 ")
+				  project-@PROVIDER@/invocation)))
+		 (buf (get-buffer-create (format "*@PROVIDER@-%s*" (project-name proj)))))
+	(prog1 buf
+	  (with-current-buffer buf
+	    (when (or (not vterm--term)
+		      (not (process-live-p vterm--process)))
+	      (vterm-mode))))))))
 
 ;;;###autoload (require 'project-@PROVIDER@)
 (cl-defun project-@PROVIDER@ (&key no-solicit)
