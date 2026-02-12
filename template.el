@@ -93,43 +93,39 @@ would if cold-starting from an in-band query)."
 			  (eq value (plist-get prop :inverse-video)))))))
       (prop-match-beginning x))))
 
+(defun project-@PROVIDER@//mash (f)
+  "Mash F until cursor position stable."
+  (cl-loop with previous = (project-@PROVIDER@//cursor-pos)
+	   with doubly-sure = 0
+	   repeat 50
+	   do (funcall f)
+	   do (accept-process-output vterm--process 0.05 nil t)
+	   for current = (project-@PROVIDER@//cursor-pos)
+	   if (equal previous current)
+	   do (cl-incf doubly-sure)
+	   else
+	   do (setq doubly-sure 0)
+	   end
+	   until (> doubly-sure 3)
+	   do (setq previous current)
+	   finally return (> doubly-sure 3)))
+
 (defun project-@PROVIDER@/say (what)
   "Say WHAT."
   (project-@PROVIDER@/ensure-ready
    ;; a simple vterm-send-string followed by vterm-send-key of
    ;; <return> results in newline-terminated string and no
    ;; submission.
-   (let ((from (save-excursion
-		 (goto-char (point-max))
-		 (re-search-backward project-@PROVIDER@/prompt-regex nil t)))
-	 (last-line (cl-loop for line in (reverse (split-string what "\n"))
-			     when (not (string-empty-p (string-trim line)))
-			     return line))
-	 (mash (lambda (f)
-		 ;; PREVIOUS should be initialized to cursor-pos.
-		 ;; But need to go round at least twice else no-worky.
-		 (cl-loop with previous
-			  do (funcall f)
-			  do (accept-process-output vterm--process 0.05 nil t)
-			  for current = (project-@PROVIDER@//cursor-pos)
-			  until (equal previous current)
-			  do (setq previous current)))))
-     (let ((inhibit-read-only t))
-       ;; best effort to clear any residual crap before sending
-       (funcall mash (apply-partially #'vterm-send-key "<down>"))
-       (funcall mash (apply-partially #'vterm-send-key "e" nil nil :ctrl))
-       (funcall mash (apply-partially #'vterm-send-key "<backspace>"))
-       (vterm-send-string (format "\"%s\"" what)))
-     (if (project-@PROVIDER@//wait-for (replace-regexp-in-string
-					"[[:space:]]+" "\\\\s-+"
-					(regexp-quote last-line))
-				       :from from)
-	 (progn
-	   (let ((inhibit-read-only t))
-	     (vterm-send-key "<return>"))
-	   ;; for vterm--filter
-	   (setq this-command 'vterm-send-key))
-       (error "Could not project-@PROVIDER@/say")))))
+   (let ((inhibit-read-only t))
+     ;; best effort to clear any residual crap before sending
+     (project-@PROVIDER@//mash (apply-partially #'vterm-send-key "<down>"))
+     (project-@PROVIDER@//mash (apply-partially #'vterm-send-key "e" nil nil :ctrl))
+     (project-@PROVIDER@//mash (apply-partially #'vterm-send-key "<backspace>"))
+     (vterm-send-string (format "\"%s\"" what))
+     (project-@PROVIDER@//mash (apply-partially #'vterm-send-key "<down>"))
+     (vterm-send-key "<return>"))
+   ;; for vterm--filter
+   (setq this-command 'vterm-send-key)))
 
 (defun project-@PROVIDER@/prompt-send ()
   "Send prompt buffer contents to @PROVIDER_TITLE@ and close prompt buffer."
