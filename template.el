@@ -122,7 +122,7 @@ would if cold-starting from an in-band query)."
      (project-@PROVIDER@//mash (apply-partially #'vterm-send-key "e" nil nil :ctrl))
      (project-@PROVIDER@//mash (apply-partially #'vterm-send-key "<backspace>"))
      (vterm-send-string (format "\"%s\"" what))
-     (project-@PROVIDER@//mash (apply-partially #'vterm-send-key "<down>"))
+     (redisplay)
      (vterm-send-key "<return>"))
    ;; for vterm--filter
    (setq this-command 'vterm-send-key)))
