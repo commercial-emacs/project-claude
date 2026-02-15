@@ -22,7 +22,7 @@
 ;; You should have received a copy of the GNU General Public License
 ;; along with GNU Emacs.  If not, see <https://www.gnu.org/licenses/>.
 
-(defconst project-gemini/prompt-regex "│\\s-*>\\s-+" "Gemini CLI prompt.")
+(defconst project-gemini/prompt-regex "│?\\s-*>\\s-+" "Gemini CLI prompt.")
 
 (defconst project-gemini/response-regex "^✦")
 
