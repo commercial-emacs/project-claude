@@ -135,23 +135,37 @@ would if cold-starting from an in-band query)."
       (deactivate-mark)))
   (when-let ((prompt (buffer-substring-no-properties (point-min) (point-max)))
 	     (not-empty-p (not (string-empty-p (string-trim prompt)))))
-    (quit-window t)
-    (let ((buf (project-@PROVIDER@ :no-solicit t)))
-      (cl-assert (eq buf (current-buffer)))
-      (project-@PROVIDER@/say prompt))))
+    (let ((o project-current-directory-override))
+      (quit-window t)
+      (let ((project-current-directory-override o))
+	(cl-assert (eq (project-@PROVIDER@ :no-solicit t) (current-buffer)))
+	(project-@PROVIDER@/say prompt)))))
 
 ;;;###autoload (require 'project-@PROVIDER@)
-(defun project-@PROVIDER@/prompt ()
+(defun project-@PROVIDER@/prompt (most-recent-session)
   "Open a prompt buffer to send queries to @PROVIDER_TITLE@."
-  (interactive)
+  (interactive "P")
   (when (> (length (window-list)) 2)
     (delete-other-windows))
-  (let ((file-ref (project-@PROVIDER@/file-reference))
+  (let ((session-p (lambda (b)
+		     (with-current-buffer b
+		       (and (eq major-mode 'vterm-mode)
+			    (string-prefix-p "*@PROVIDER@" (buffer-name))
+			    (project-current)))))
+	(parent-buf (current-buffer))
 	(buf (get-buffer-create "*@PROVIDER@-prompt*")))
     (with-current-buffer buf
+      (when-let ((b (and most-recent-session (seq-find session-p (buffer-list)))))
+	(setq-local project-current-directory-override
+		    (with-current-buffer b (project-root (project-current)))))
       (project-@PROVIDER@/prompt-mode)
       (erase-buffer)
-      (when file-ref (insert file-ref " ")))
+      (when-let ((file-ref
+		  (let ((o project-current-directory-override))
+		    (with-current-buffer parent-buf
+		      (let ((project-current-directory-override o))
+			(project-@PROVIDER@/file-reference))))))
+	(insert file-ref " ")))
     (pop-to-buffer buf '((display-buffer-at-bottom)
 			 (window-height . 5)))))
 
