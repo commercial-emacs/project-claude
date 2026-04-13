@@ -77,7 +77,7 @@ define install-recipe
 endef
 
 emacs-ghostty/ghostty-vt.el:
-	git clone --depth 1 https://github.com/commercial-emacs/emacs-ghostty.git
+	git clone --depth 1 https://github.com/dickmao/emacs-ghostty.git
 
 emacs-ghostty/ghostty-vt-module.so: emacs-ghostty/ghostty-vt.el
 	rm -rf deps
