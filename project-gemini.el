@@ -5,7 +5,7 @@
 ;; Author: dickmao
 ;; Version: 0.0.1
 ;; URL: https://github.com/dickmao/project-gemini
-;; Package-Requires: ((vterm "0.0.4"))
+;; Package-Requires: ((ghostty-vt "0.0.1"))
 
 ;; This file is not part of GNU Emacs.
 
@@ -42,12 +42,12 @@
   "Clear errant ANSI terminal query response at gemini startup."
   (when (and (string-match-p "\\*gemini-" (buffer-name))
 	     (project-gemini//wait-for project-gemini/prompt-regex))
-    (vterm-send-key "a" nil nil t)
-    (vterm-send-key "k" nil nil t)
-    (setq this-command 'vterm-send-key) ;for vterm--filter
+    (ghostty-vt-send-key "a" nil nil t)
+    (ghostty-vt-send-key "k" nil nil t)
+    (setq this-command 'ghostty-vt-send-key) ;for ghostty-vt--filter
     ))
 
-(add-hook 'vterm-mode-hook #'project-gemini/clear-on-startup)
+(add-hook 'ghostty-vt-mode-hook #'project-gemini/clear-on-startup)
 
 (provide 'project-gemini)
 ;;; project-gemini.el ends here

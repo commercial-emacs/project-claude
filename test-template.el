@@ -4,7 +4,7 @@
 (require 'project-@PROVIDER@)
 
 (ert-deftest @PROVIDER@-basic ()
-  (let* (vterm-mode-hook ;neutralize project-gemini/clear-on-startup
+  (let* (ghostty-vt-mode-hook ;neutralize project-gemini/clear-on-startup
 	 (project-@PROVIDER@/invocation (format "echo foo && sleep 20"))
 	 (buf (project-@PROVIDER@ :no-solicit t)))
     (should (eq buf (current-buffer)))

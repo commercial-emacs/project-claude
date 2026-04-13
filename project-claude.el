@@ -5,7 +5,7 @@
 ;; Author: dickmao
 ;; Version: 0.0.1
 ;; URL: https://github.com/dickmao/project-claude
-;; Package-Requires: ((vterm "0.0.4"))
+;; Package-Requires: ((ghostty-vt "0.0.1"))
 
 ;; This file is not part of GNU Emacs.
 

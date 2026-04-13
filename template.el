@@ -1,7 +1,7 @@
 ;; project-@PROVIDER@-generated.el --- do not edit -*- lexical-binding: t; -*-
 
 (require 'project)
-(require 'vterm)
+(require 'ghostty-vt)
 
 (defvar project-@PROVIDER@/prompt-regex)
 (defvar project-@PROVIDER@/invocation)
@@ -11,8 +11,8 @@
   `(with-current-buffer (or (project-@PROVIDER@/get-buffer :no-solicit t)
 			    (error "project-@PROVIDER@/get-buffer failed"))
      (when (project-@PROVIDER@//wait-for project-@PROVIDER@/prompt-regex)
-       (when vterm-copy-mode
-	 (vterm-copy-mode-done))
+       (when ghostty-vt-copy-mode
+	 (ghostty-vt-copy-mode-done))
        ,@body)))
 
 (cl-defun project-@PROVIDER@/get-buffer (&key no-solicit)
@@ -26,7 +26,7 @@ would if cold-starting from an in-band query)."
     (if (and (consp proj) (eq (car proj) 'transient))
 	(user-error "Avoid running with no project")
       (when-let ((default-directory (project-root proj))
-		 (vterm-shell
+		 (ghostty-vt-shell
 		  (format "/bin/sh -c '%s'"
 			  (concat (when no-solicit
 				    "DISABLE_TELEMETRY=1 DISABLE_AUTOUPDATER=1 ")
@@ -34,9 +34,9 @@ would if cold-starting from an in-band query)."
 		 (buf (get-buffer-create (format "*@PROVIDER@-%s*" (project-name proj)))))
 	(prog1 buf
 	  (with-current-buffer buf
-	    (when (or (not vterm--term)
-		      (not (process-live-p vterm--process)))
-	      (vterm-mode))))))))
+	    (when (or (not ghostty-vt--term)
+		      (not (process-live-p ghostty-vt--process)))
+	      (ghostty-vt-mode))))))))
 
 ;;;###autoload (require 'project-@PROVIDER@)
 (cl-defun project-@PROVIDER@ (&key no-solicit)
@@ -78,7 +78,7 @@ would if cold-starting from an in-band query)."
 				 (goto-char from)
 				 (funcall (if absence #'not #'identity)
 					  (re-search-forward regex nil t))))
-	   do (accept-process-output vterm--process 0.05 nil t)
+	   do (accept-process-output ghostty-vt--process 0.05 nil t)
 	   finally return success))
 
 (defun project-@PROVIDER@//cursor-pos ()
@@ -99,7 +99,7 @@ would if cold-starting from an in-band query)."
 	   with doubly-sure = 0
 	   repeat 50
 	   do (funcall f)
-	   do (accept-process-output vterm--process 0.05 nil t)
+	   do (accept-process-output ghostty-vt--process 0.05 nil t)
 	   for current = (project-@PROVIDER@//cursor-pos)
 	   if (equal previous current)
 	   do (cl-incf doubly-sure)
@@ -113,19 +113,19 @@ would if cold-starting from an in-band query)."
 (defun project-@PROVIDER@/say (what)
   "Say WHAT."
   (project-@PROVIDER@/ensure-ready
-   ;; a simple vterm-send-string followed by vterm-send-key of
+   ;; a simple ghostty-vt-send-string followed by ghostty-vt-send-key of
    ;; <return> results in newline-terminated string and no
    ;; submission.
    (let ((inhibit-read-only t))
      ;; best effort to clear any residual crap before sending
-     (project-@PROVIDER@//mash (apply-partially #'vterm-send-key "<down>"))
-     (project-@PROVIDER@//mash (apply-partially #'vterm-send-key "e" nil nil :ctrl))
-     (project-@PROVIDER@//mash (apply-partially #'vterm-send-key "<backspace>"))
-     (vterm-send-string (format "\"%s\"" what))
-     (project-@PROVIDER@//mash (apply-partially #'vterm-send-key "e" nil nil :ctrl))
-     (vterm-send-key "<return>"))
-   ;; for vterm--filter
-   (setq this-command 'vterm-send-key)))
+     (project-@PROVIDER@//mash (apply-partially #'ghostty-vt-send-key "<down>"))
+     (project-@PROVIDER@//mash (apply-partially #'ghostty-vt-send-key "e" nil nil :ctrl))
+     (project-@PROVIDER@//mash (apply-partially #'ghostty-vt-send-key "<backspace>"))
+     (ghostty-vt-send-string (format "\"%s\"" what))
+     (project-@PROVIDER@//mash (apply-partially #'ghostty-vt-send-key "e" nil nil :ctrl))
+     (ghostty-vt-send-key "<return>"))
+   ;; for ghostty-vt--filter
+   (setq this-command 'ghostty-vt-send-key)))
 
 (defun project-@PROVIDER@/prompt-send ()
   "Send prompt buffer contents to @PROVIDER_TITLE@ and close prompt buffer."
@@ -149,7 +149,7 @@ would if cold-starting from an in-band query)."
     (delete-other-windows))
   (let ((session-p (lambda (b)
 		     (with-current-buffer b
-		       (and (eq major-mode 'vterm-mode)
+		       (and (eq major-mode 'ghostty-vt-mode)
 			    (string-prefix-p "*@PROVIDER@" (buffer-name))
 			    (project-current)))))
 	(parent-buf (current-buffer))

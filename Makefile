@@ -76,24 +76,24 @@ define install-recipe
 	$(MAKE) dist-clean
 endef
 
-emacs-libvterm/vterm.el:
-	git clone --depth 1 https://github.com/commercial-emacs/emacs-libvterm.git
+emacs-ghostty/ghostty-vt.el:
+	git clone --depth 1 https://github.com/commercial-emacs/emacs-ghostty.git
 
-emacs-libvterm/vterm-module.so: emacs-libvterm/vterm.el
+emacs-ghostty/ghostty-vt-module.so: emacs-ghostty/ghostty-vt.el
 	rm -rf deps
-	$(MAKE) -C emacs-libvterm INSTALLDIR=$(CURDIR)/deps install
+	$(MAKE) -C emacs-ghostty INSTALLDIR=$(CURDIR)/deps install
 
-deps/archives/gnu/archive-contents: emacs-libvterm/vterm-module.so
+deps/archives/gnu/archive-contents: emacs-ghostty/ghostty-vt-module.so
 	$(call install-recipe,$(CURDIR)/deps)
 	rm -rf deps/project-claude* # just keep deps
 
 .PHONY: clean
 clean: dist-clean
-	git clean -dffX # ff because emacs-libvterm has a git subdir
+	git clean -dffX # ff because emacs-ghostty has a git subdir
 
-.PHONY: install-emacs-libvterm
-install-emacs-libvterm: emacs-libvterm/vterm.el
-	$(MAKE) -C emacs-libvterm INSTALLDIR=$(INSTALLDIR) install
+.PHONY: install-emacs-ghostty
+install-emacs-ghostty: emacs-ghostty/ghostty-vt.el
+	$(MAKE) -C emacs-ghostty INSTALLDIR=$(INSTALLDIR) install
 
 .PHONY: install
 install:
@@ -103,9 +103,9 @@ install:
 	if [[ "$${INSTALL_PATH}" == /* ]]; then INSTALL_PATH=\"$${INSTALL_PATH}\"; fi; \
 	1>/dev/null 2>/dev/null $(EMACS) --batch \
 	  --eval "(setq package-user-dir (expand-file-name $${INSTALL_PATH}))" \
-	  -f package-initialize -l vterm \
+	  -f package-initialize -l ghostty-vt \
 	  --eval "(or (version-list-<= '(0 0 4) \
-	   (package-desc-version (car (alist-get 'vterm package-alist)))) \
-	   (error))" || $(MAKE) INSTALLDIR=$(INSTALLDIR) install-emacs-libvterm \
+	   (package-desc-version (car (alist-get 'ghostty-vt package-alist)))) \
+	   (error))" || $(MAKE) INSTALLDIR=$(INSTALLDIR) install-emacs-ghostty \
 	)
 	$(call install-recipe,$(INSTALLDIR))
