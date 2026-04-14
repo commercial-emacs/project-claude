@@ -31,6 +31,7 @@
       (let ((current-prefix-arg '(4)))
 	(call-interactively #'project-@PROVIDER@/insert-file-ref)
 	(goto-char (point-min))
+	(prin1 (buffer-string))
 	(should (re-search-forward (regexp-quote "@../test-template.el:1") nil t))))))
 
 (provide 'test-project-@PROVIDER@-generated)
