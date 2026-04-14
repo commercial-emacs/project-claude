@@ -48,24 +48,6 @@ would if cold-starting from an in-band query)."
   (when-let ((buf (project-@PROVIDER@/get-buffer :no-solicit no-solicit)))
     (pop-to-buffer buf '((display-buffer-use-some-window) . ((some-window . mru))))))
 
-(defvar project-@PROVIDER@/prompt-mode-map
-  (let ((map (make-sparse-keymap)))
-    (define-key map (kbd "C-c C-c") 'project-@PROVIDER@/prompt-send)
-    (define-key map (kbd "C-c C-k") 'project-@PROVIDER@/prompt-cancel)
-    map)
-  "Keymap for `project-@PROVIDER@/prompt-mode'.")
-
-(define-derived-mode project-@PROVIDER@/prompt-mode text-mode "@PROVIDER_TITLE@-Prompt"
-  "Major mode for entering prompts to send to @PROVIDER_TITLE@.
-\\{project-@PROVIDER@/prompt-mode-map}"
-  (setq header-line-format
-        "Enter prompt for @PROVIDER_TITLE@. C-c C-c to send, C-c C-k to cancel"))
-
-(defun project-@PROVIDER@/prompt-cancel ()
-  "Call it off."
-  (interactive)
-  (quit-window t))
-
 (cl-defun project-@PROVIDER@//wait-for (regex &key
 					(from (point-min))
 					(timeout 10)
@@ -127,47 +109,39 @@ would if cold-starting from an in-band query)."
    ;; for ghostty-vt--filter
    (setq this-command 'ghostty-vt-send-key)))
 
-(defun project-@PROVIDER@/prompt-send ()
-  "Send prompt buffer contents to @PROVIDER_TITLE@ and close prompt buffer."
-  (interactive)
-  (when-let ((source-buf (window-buffer (get-mru-window nil nil t))))
-    (with-current-buffer source-buf
-      (deactivate-mark)))
-  (when-let ((prompt (buffer-substring-no-properties (point-min) (point-max)))
-	     (not-empty-p (not (string-empty-p (string-trim prompt)))))
-    (let ((o project-current-directory-override))
-      (quit-window t)
-      (let ((project-current-directory-override o))
-	(cl-assert (eq (project-@PROVIDER@ :no-solicit t) (current-buffer)))
-	(project-@PROVIDER@/say prompt)))))
-
 ;;;###autoload (require 'project-@PROVIDER@)
-(defun project-@PROVIDER@/prompt (most-recent-session)
-  "Open a prompt buffer to send queries to @PROVIDER_TITLE@."
+(defun project-@PROVIDER@/insert-file-ref (most-recent-session)
+  "Bring up ghostty-vt, inject a file ref.
+C-u to use project of last @PROVIDER_TITLE@ session instead of current buffer's."
   (interactive "P")
-  (when (> (length (window-list)) 2)
-    (delete-other-windows))
-  (let ((session-p (lambda (b)
+  (deactivate-mark)
+  (let* ((session-p (lambda (b)
+		      (with-current-buffer b
+			(and (eq major-mode 'ghostty-vt-mode)
+			     (string-prefix-p "*@PROVIDER@" (buffer-name))
+			     (project-current)))))
+	 (parent-buf (current-buffer))
+	 (override (when-let ((b (when most-recent-session
+				   (seq-find session-p (buffer-list)))))
 		     (with-current-buffer b
-		       (and (eq major-mode 'ghostty-vt-mode)
-			    (string-prefix-p "*@PROVIDER@" (buffer-name))
-			    (project-current)))))
-	(parent-buf (current-buffer))
-	(buf (get-buffer-create "*@PROVIDER@-prompt*")))
-    (with-current-buffer buf
-      (when-let ((b (and most-recent-session (seq-find session-p (buffer-list)))))
-	(setq-local project-current-directory-override
-		    (with-current-buffer b (project-root (project-current)))))
-      (project-@PROVIDER@/prompt-mode)
-      (erase-buffer)
-      (when-let ((file-ref
-		  (let ((o project-current-directory-override))
-		    (with-current-buffer parent-buf
-		      (let ((project-current-directory-override o))
-			(project-@PROVIDER@/file-reference))))))
-	(insert file-ref " ")))
-    (pop-to-buffer buf '((display-buffer-at-bottom)
-			 (window-height . 5)))))
+		       (project-root (project-current)))))
+	 (file-ref (with-current-buffer parent-buf
+		     (let ((project-current-directory-override override))
+		       (project-@PROVIDER@/file-reference))))
+	 (buf (save-window-excursion
+		(let ((project-current-directory-override override))
+		  (project-@PROVIDER@/ensure-ready ;abbrev project-@PROVIDER@/say
+		   (let ((inhibit-read-only t))
+		     (ghostty-vt-send-string (format "\"%s\" " file-ref))
+		     (project-@PROVIDER@//mash
+		      (apply-partially #'ghostty-vt-send-key "e" nil nil :ctrl)))
+		   ;; for ghostty-vt--filter
+		   (setq this-command 'ghostty-vt-send-key)
+		   (current-buffer))))))
+    (when (or (/= (length (window-list)) 2)
+	      (not (eq buf (window-buffer (next-window)))))
+      (delete-other-windows)
+      (pop-to-buffer buf '(display-buffer-below-selected)))))
 
 (defun project-@PROVIDER@/file-reference ()
   "Construct @PROVIDER_TITLE@ file reference from current position."
@@ -204,7 +178,7 @@ would if cold-starting from an in-band query)."
   "Minor mode for @PROVIDER_TITLE@ integration."
   :group 'project-@PROVIDER@
   :keymap (let ((map (make-sparse-keymap)))
-            (define-key map (kbd "C-c '") #'project-@PROVIDER@/prompt)
+            (define-key map (kbd "C-c '") #'project-@PROVIDER@/insert-file-ref)
             map))
 
 ;;;###autoload (require 'project-@PROVIDER@)
