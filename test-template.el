@@ -26,7 +26,7 @@
     (project-@PROVIDER@/ensure-ready
      (should (equal (project-current) current-project)))
     (let ((default-directory parent-dir))
-      (project-root-find-file "test-template.el")
+      (find-file  "test-template.el" t)
       (should (equal parent-project (project-current)))
       (let ((current-prefix-arg '(4)))
 	(call-interactively #'project-@PROVIDER@/insert-file-ref)
