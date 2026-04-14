@@ -114,7 +114,6 @@ would if cold-starting from an in-band query)."
   "Bring up ghostty-vt, inject a file ref.
 C-u to use project of last @PROVIDER_TITLE@ session instead of current buffer's."
   (interactive "P")
-  (deactivate-mark)
   (let* ((session-p (lambda (b)
 		      (with-current-buffer b
 			(and (eq major-mode 'ghostty-vt-mode)
@@ -127,7 +126,8 @@ C-u to use project of last @PROVIDER_TITLE@ session instead of current buffer's.
 		       (project-root (project-current)))))
 	 (file-ref (with-current-buffer parent-buf
 		     (let ((project-current-directory-override override))
-		       (project-@PROVIDER@/file-reference))))
+		       (prog1 (project-@PROVIDER@/file-reference)
+			 (deactivate-mark)))))
 	 (buf (save-window-excursion
 		(let ((project-current-directory-override override))
 		  (project-@PROVIDER@/ensure-ready ;abbrev project-@PROVIDER@/say
