@@ -31,7 +31,7 @@
   :group 'tools
   :prefix "project-claude/")
 
-(defcustom project-claude/invocation "claude"
+(defcustom project-claude/invocation "CLAUDE_CODE_NO_FLICKER=1 claude"
   "Command line shell invocation."
   :group 'project-claude
   :type 'string)
