@@ -25,14 +25,16 @@
     (should-not (equal parent-project current-project))
     (project-@PROVIDER@/ensure-ready
      (should (equal (project-current) current-project)))
-    (let ((default-directory parent-dir))
-      (find-file  "test-template.el" t)
+    (let* ((default-directory parent-dir)
+	   (b (find-file "test-template.el")))
+      (should (equal (current-buffer) b))
       (should (equal parent-project (project-current)))
       (let ((current-prefix-arg '(4)))
 	(call-interactively #'project-@PROVIDER@/insert-file-ref)
 	(goto-char (point-min))
 	(prin1 (buffer-string))
-	(should (re-search-forward (regexp-quote "@../test-template.el:1") nil t))))))
+	(should (re-search-forward (regexp-quote "@../test-template.el:1") nil t)))
+      (kill-buffer b))))
 
 (provide 'test-project-@PROVIDER@-generated)
 ;;; test-project-@PROVIDER@-generated.el ends here
