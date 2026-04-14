@@ -38,7 +38,7 @@ test: compile
 	$(EMACS) --batch --eval "(setq package-user-dir (expand-file-name \"deps\"))" \
 	  -f package-initialize \
 	  -L . $(patsubst %.el,-l %,$(notdir $(TESTSRC))) \
-	  -f ert-run-tests-batch
+	  -f ert-run-tests-batch-and-exit
 
 .PHONY: dist-clean
 dist-clean:
