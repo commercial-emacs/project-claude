@@ -44,3 +44,5 @@ jobs:
       run: |
         ${{ startsWith(runner.os, 'macOS') && 'gmake' || 'make' }} test
         ${{ startsWith(runner.os, 'macOS') && 'gmake' || 'make' }} install
+        ${{ startsWith(runner.os, 'macOS') && 'gmake' || 'make' }} TEMU=vterm test
+        ${{ startsWith(runner.os, 'macOS') && 'gmake' || 'make' }} TEMU=vterm install
