@@ -5,7 +5,7 @@
 ;; Author: dickmao
 ;; Version: 0.0.1
 ;; URL: https://github.com/dickmao/project-claude
-;; Package-Requires: ((ghostty-vt "0.0.1"))
+;; Package-Requires: ((@TEMU@ "0.0.1"))
 
 ;; This file is not part of GNU Emacs.
 
@@ -31,7 +31,7 @@
   :group 'tools
   :prefix "project-claude/")
 
-(defcustom project-claude/invocation "CLAUDE_CODE_NO_FLICKER=1 claude"
+(defcustom project-claude/invocation "claude"
   "Command line shell invocation."
   :group 'project-claude
   :type 'string)

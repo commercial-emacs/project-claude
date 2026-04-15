@@ -38,9 +38,9 @@ jobs:
     - name: brew-haha
       if: startsWith(runner.os, 'macOS')
       run: |
-        brew install emacs libgccjit libxml2 libtool
+        brew install emacs libgccjit libxml2 libtool make
 
     - name: test
       run: |
-        make test
-        make install
+        ${{ startsWith(runner.os, 'macOS') && 'gmake' || 'make' }} test
+        ${{ startsWith(runner.os, 'macOS') && 'gmake' || 'make' }} install

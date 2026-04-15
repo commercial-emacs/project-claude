@@ -4,7 +4,7 @@
 (require 'project-@PROVIDER@)
 
 (ert-deftest @PROVIDER@-basic ()
-  (let* (ghostty-vt-mode-hook ;neutralize project-gemini/clear-on-startup
+  (let* (@TEMU@-mode-hook ;neutralize project-gemini/clear-on-startup
 	 (project-@PROVIDER@/invocation (format "echo foo && sleep 20"))
 	 (buf (project-@PROVIDER@ :no-solicit t)))
     (should (eq buf (current-buffer)))
@@ -14,7 +14,7 @@
 
 (ert-deftest @PROVIDER@-current-prefix-arg-insert-file-ref ()
   "File reference is relative path to emacs-ghostty subdir."
-  (cl-letf* ((ghostty-vt-mode-hook) ;neutralize project-gemini/clear-on-startup
+  (cl-letf* ((@TEMU@-mode-hook) ;neutralize project-gemini/clear-on-startup
 	     ((symbol-function 'project-remember-project) #'identity)
 	     (project-@PROVIDER@/invocation "/bin/sh")
 	     (project-@PROVIDER@/prompt-regex "$")

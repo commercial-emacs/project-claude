@@ -1,7 +1,7 @@
 ;; project-@PROVIDER@-generated.el --- do not edit -*- lexical-binding: t; -*-
 
 (require 'project)
-(require 'ghostty-vt)
+(require '@TEMU@)
 
 (defvar project-@PROVIDER@/prompt-regex)
 (defvar project-@PROVIDER@/invocation)
@@ -11,8 +11,8 @@
   `(with-current-buffer (or (project-@PROVIDER@/get-buffer :no-solicit t)
 			    (error "project-@PROVIDER@/get-buffer failed"))
      (when (project-@PROVIDER@//wait-for project-@PROVIDER@/prompt-regex)
-       (when ghostty-vt-copy-mode
-	 (ghostty-vt-copy-mode-done))
+       (when @TEMU@-copy-mode
+	 (@TEMU@-copy-mode-done))
        ,@body)))
 
 (cl-defun project-@PROVIDER@/get-buffer (&key no-solicit)
@@ -26,7 +26,7 @@ would if cold-starting from an in-band query)."
     (if (and (consp proj) (eq (car proj) 'transient))
 	(user-error "Avoid running with no project")
       (when-let ((default-directory (project-root proj))
-		 (ghostty-vt-shell
+		 (@TEMU@-shell
 		  (format "/bin/sh -c '%s'"
 			  (concat (when no-solicit
 				    "DISABLE_TELEMETRY=1 DISABLE_AUTOUPDATER=1 ")
@@ -34,9 +34,9 @@ would if cold-starting from an in-band query)."
 		 (buf (get-buffer-create (format "*@PROVIDER@-%s*" (project-name proj)))))
 	(prog1 buf
 	  (with-current-buffer buf
-	    (when (or (not ghostty-vt--term)
-		      (not (process-live-p ghostty-vt--process)))
-	      (ghostty-vt-mode))))))))
+	    (when (or (not @TEMU@--term)
+		      (not (process-live-p @TEMU@--process)))
+	      (@TEMU@-mode))))))))
 
 ;;;###autoload (require 'project-@PROVIDER@)
 (cl-defun project-@PROVIDER@ (&key no-solicit)
@@ -60,7 +60,7 @@ would if cold-starting from an in-band query)."
 				 (goto-char from)
 				 (funcall (if absence #'not #'identity)
 					  (re-search-forward regex nil t))))
-	   do (accept-process-output ghostty-vt--process 0.05 nil t)
+	   do (accept-process-output @TEMU@--process 0.05 nil t)
 	   finally return success))
 
 (defun project-@PROVIDER@//cursor-pos ()
@@ -81,7 +81,7 @@ would if cold-starting from an in-band query)."
 	   with doubly-sure = 0
 	   repeat 50
 	   do (funcall f)
-	   do (accept-process-output ghostty-vt--process 0.05 nil t)
+	   do (accept-process-output @TEMU@--process 0.05 nil t)
 	   for current = (project-@PROVIDER@//cursor-pos)
 	   if (equal previous current)
 	   do (cl-incf doubly-sure)
@@ -95,28 +95,28 @@ would if cold-starting from an in-band query)."
 (defun project-@PROVIDER@/say (what)
   "Say WHAT."
   (project-@PROVIDER@/ensure-ready
-   ;; a simple ghostty-vt-send-string followed by ghostty-vt-send-key of
+   ;; a simple @TEMU@-send-string followed by @TEMU@-send-key of
    ;; <return> results in newline-terminated string and no
    ;; submission.
    (let ((inhibit-read-only t))
      ;; best effort to clear any residual crap before sending
-     (project-@PROVIDER@//mash (apply-partially #'ghostty-vt-send-key "<down>"))
-     (project-@PROVIDER@//mash (apply-partially #'ghostty-vt-send-key "e" nil nil :ctrl))
-     (project-@PROVIDER@//mash (apply-partially #'ghostty-vt-send-key "<backspace>"))
-     (ghostty-vt-send-string (format "\"%s\"" what))
-     (project-@PROVIDER@//mash (apply-partially #'ghostty-vt-send-key "e" nil nil :ctrl))
-     (ghostty-vt-send-key "<return>"))
-   ;; for ghostty-vt--filter
-   (setq this-command 'ghostty-vt-send-key)))
+     (project-@PROVIDER@//mash (apply-partially #'@TEMU@-send-key "<down>"))
+     (project-@PROVIDER@//mash (apply-partially #'@TEMU@-send-key "e" nil nil :ctrl))
+     (project-@PROVIDER@//mash (apply-partially #'@TEMU@-send-key "<backspace>"))
+     (@TEMU@-send-string (format "\"%s\"" what))
+     (project-@PROVIDER@//mash (apply-partially #'@TEMU@-send-key "e" nil nil :ctrl))
+     (@TEMU@-send-key "<return>"))
+   ;; for @TEMU@--filter
+   (setq this-command '@TEMU@-send-key)))
 
 ;;;###autoload (require 'project-@PROVIDER@)
 (defun project-@PROVIDER@/insert-file-ref (most-recent-session)
-  "Bring up ghostty-vt, inject a file ref.
+  "Bring up @TEMU@, inject a file ref.
 C-u to use project of last @PROVIDER_TITLE@ session instead of current buffer's."
   (interactive "P")
   (let* ((session-p (lambda (b)
 		      (with-current-buffer b
-			(and (eq major-mode 'ghostty-vt-mode)
+			(and (eq major-mode '@TEMU@-mode)
 			     (string-prefix-p "*@PROVIDER@" (buffer-name))
 			     (project-current)))))
 	 (parent-buf (current-buffer))
@@ -132,14 +132,15 @@ C-u to use project of last @PROVIDER_TITLE@ session instead of current buffer's.
 		(let ((project-current-directory-override override))
 		  (project-@PROVIDER@/ensure-ready ;abbrev project-@PROVIDER@/say
 		   (let ((inhibit-read-only t))
-		     (ghostty-vt-send-string (format "\"%s\" " file-ref))
+		     (@TEMU@-send-string (format "\"%s\" " file-ref))
 		     (project-@PROVIDER@//mash
-		      (apply-partially #'ghostty-vt-send-key "e" nil nil :ctrl)))
-		   ;; for ghostty-vt--filter
-		   (setq this-command 'ghostty-vt-send-key)
+		      (apply-partially #'@TEMU@-send-key "e" nil nil :ctrl)))
+		   ;; for @TEMU@--filter
+		   (setq this-command '@TEMU@-send-key)
 		   (current-buffer))))))
-    (when (or (/= (length (window-list)) 2)
-	      (not (eq buf (window-buffer (next-window)))))
+    (if (and (= (length (window-list)) 2)
+	     (eq buf (window-buffer (next-window))))
+	(other-window 1)
       (delete-other-windows)
       (pop-to-buffer buf '(display-buffer-below-selected)))))
 

@@ -1,6 +1,9 @@
 *.elc
 /deps
 /emacs-ghostty
+/emacs-libvterm
+project-claude.el
+project-gemini.el
 project-claude-generated.el
 project-gemini-generated.el
 test-project-claude-generated.el
