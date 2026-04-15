@@ -65,11 +65,13 @@ project-gemini-generated.el: template.el
 test-project-claude-generated.el: test-template.el
 	sed -e 's/@PROVIDER@/claude/g' \
 	    -e 's/@TEMU@/$(TEMU_PKG)/g' \
+	    -e 's/@TEMU_DIR@/$(TEMU_DIR)/g' \
 	    test-template.el > test-project-claude-generated.el
 
 test-project-gemini-generated.el: test-template.el
 	sed -e 's/@PROVIDER@/gemini/g' \
 	    -e 's/@TEMU@/$(TEMU_PKG)/g' \
+	    -e 's/@TEMU_DIR@/$(TEMU_DIR)/g' \
 	    test-template.el > test-project-gemini-generated.el
 
 .PHONY: vterm ghostty

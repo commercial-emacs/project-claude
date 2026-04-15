@@ -20,7 +20,7 @@
 	     (project-@PROVIDER@/prompt-regex "$")
 	     (parent-dir default-directory)
 	     (parent-project (project-current))
-	     (default-directory (expand-file-name "emacs-ghostty"))
+	     (default-directory (expand-file-name "@TEMU_DIR@"))
 	     (current-project (project-current)))
     (should-not (equal parent-project current-project))
     (project-@PROVIDER@/ensure-ready
