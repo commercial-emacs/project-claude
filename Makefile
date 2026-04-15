@@ -9,9 +9,9 @@ INSTALLDIR ?= package-user-dir
 TEMU ?= ghostty
 
 ifeq ($(TEMU),ghostty)
-  ifeq ($(filter clean dist-clean,$(MAKECMDGOALS)),)
+  ifeq ($(filter clean veryclean dist-clean,$(MAKECMDGOALS)),)
     ifneq ($(wildcard emacs-libvterm),)
-      $(error emacs-libvterm exists: run make clean)
+      $(error emacs-libvterm exists: run make veryclean)
     endif
   endif
 TEMU_PKG  := ghostty-vt
@@ -20,9 +20,9 @@ TEMU_REPO := https://github.com/dickmao/emacs-ghostty.git
 TEMU_EL   := $(TEMU_DIR)/ghostty-vt.el
 TEMU_SO   := $(TEMU_DIR)/ghostty-vt-module.so
 else
-  ifeq ($(filter clean dist-clean,$(MAKECMDGOALS)),)
+  ifeq ($(filter clean veryclean dist-clean,$(MAKECMDGOALS)),)
     ifneq ($(wildcard emacs-ghostty),)
-      $(error emacs-ghostty exists: run make clean)
+      $(error emacs-ghostty exists: run make veryclean)
     endif
   endif
 TEMU_PKG  := vterm
@@ -85,7 +85,7 @@ test: compile
 	  -f ert-run-tests-batch-and-exit
 
 .PHONY: dist-clean
-dist-clean:
+dist-clean: $(ELGEN)
 	( \
 	set -e; \
 	PKG_NAME=`$(EMACS) -batch -L . -l project-claude-package --eval "(princ (project-claude-package-name))"`; \
@@ -94,7 +94,7 @@ dist-clean:
 	)
 
 .PHONY: dist
-dist: dist-clean $(ELGEN)
+dist: dist-clean
 	$(EMACS) -batch -L . -l project-claude-package -f project-claude-package-inception
 	( \
 	set -e; \
@@ -138,6 +138,10 @@ deps/archives/gnu/archive-contents: deps/.$(TEMU_PKG)-installed $(ELGEN)
 .PHONY: clean
 clean: dist-clean
 	git clean -dfX
+
+.PHONY: veryclean
+veryclean: clean
+	git clean -dffX # removes TEMUs
 
 .PHONY: install-emacs-$(TEMU)
 install-emacs-$(TEMU): $(TEMU_EL)
