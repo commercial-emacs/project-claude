@@ -137,7 +137,7 @@ deps/archives/gnu/archive-contents: deps/.$(TEMU_PKG)-installed $(ELGEN)
 
 .PHONY: clean
 clean: dist-clean
-	git clean -dffX # ff because $(TEMU_DIR) has a git subdir
+	git clean -dfX
 
 .PHONY: install-emacs-$(TEMU)
 install-emacs-$(TEMU): $(TEMU_EL)
