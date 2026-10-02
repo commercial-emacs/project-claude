@@ -5,7 +5,7 @@
 ;; Author: dickmao
 ;; Version: 0.0.1
 ;; URL: https://github.com/dickmao/project-gemini
-;; Package-Requires: ((@TEMU@ "0.0.1"))
+;; Package-Requires: ((emacs "29.1"))
 
 ;; This file is not part of GNU Emacs.
 
@@ -42,12 +42,12 @@
   "Clear errant ANSI terminal query response at gemini startup."
   (when (and (string-match-p "\\*gemini-" (buffer-name))
 	     (project-gemini//wait-for project-gemini/prompt-regex))
-    (@TEMU@-send-key "a" nil nil t)
-    (@TEMU@-send-key "k" nil nil t)
-    (setq this-command '@TEMU@-send-key) ;for @TEMU@--filter
+    (@TEMU_PKG@-send-key "a" nil nil t)
+    (@TEMU_PKG@-send-key "k" nil nil t)
+    (setq this-command '@TEMU_PKG@-send-key) ;for @TEMU_PKG@--filter
     ))
 
-(add-hook '@TEMU@-mode-hook #'project-gemini/clear-on-startup)
+(add-hook '@TEMU_PKG@-mode-hook #'project-gemini/clear-on-startup)
 
 (provide 'project-gemini)
 ;;; project-gemini.el ends here

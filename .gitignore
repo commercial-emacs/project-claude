@@ -9,3 +9,5 @@ project-gemini-generated.el
 test-project-claude-generated.el
 test-project-gemini-generated.el
 !/.claude
+/epkg/
+/epkg.mk

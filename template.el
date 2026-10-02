@@ -1,7 +1,7 @@
 ;; project-@PROVIDER@-generated.el --- do not edit -*- lexical-binding: t; -*-
 
 (require 'project)
-(require '@TEMU@)
+(epkg-require '@TEMU_PKG@ "@TEMU_REPO@")
 
 (defvar project-@PROVIDER@/prompt-regex)
 (defvar project-@PROVIDER@/invocation)
@@ -11,8 +11,8 @@
   `(with-current-buffer (or (project-@PROVIDER@/get-buffer :no-solicit t)
 			    (error "project-@PROVIDER@/get-buffer failed"))
      (when (project-@PROVIDER@//wait-for project-@PROVIDER@/prompt-regex)
-       (when @TEMU@-copy-mode
-	 (@TEMU@-copy-mode-done))
+       (when @TEMU_PKG@-copy-mode
+	 (@TEMU_PKG@-copy-mode-done))
        ,@body)))
 
 (cl-defun project-@PROVIDER@/get-buffer (&key no-solicit)
@@ -25,18 +25,18 @@ would if cold-starting from an in-band query)."
                 (project-current))))
     (if (and (consp proj) (eq (car proj) 'transient))
 	(user-error "Avoid running with no project")
-      (when-let ((default-directory (project-root proj))
-		 (@TEMU@-shell
-		  (format "/bin/sh -c '%s'"
-			  (concat (when no-solicit
-				    "DISABLE_TELEMETRY=1 DISABLE_AUTOUPDATER=1 ")
-				  project-@PROVIDER@/invocation)))
-		 (buf (get-buffer-create (format "*@PROVIDER@-%s*" (project-name proj)))))
+      (when-let* ((default-directory (project-root proj))
+		  (@TEMU_PKG@-shell
+		   (format "/bin/sh -c '%s'"
+			   (concat (when no-solicit
+				     "DISABLE_TELEMETRY=1 DISABLE_AUTOUPDATER=1 ")
+				   project-@PROVIDER@/invocation)))
+		  (buf (get-buffer-create (format "*@PROVIDER@-%s*" (project-name proj)))))
 	(prog1 buf
 	  (with-current-buffer buf
-	    (when (or (not @TEMU@--term)
-		      (not (process-live-p @TEMU@--process)))
-	      (@TEMU@-mode))))))))
+	    (when (or (not @TEMU_PKG@--term)
+		      (not (process-live-p @TEMU_PKG@--process)))
+	      (@TEMU_PKG@-mode))))))))
 
 ;;;###autoload (require 'project-@PROVIDER@)
 (cl-defun project-@PROVIDER@ (&key no-solicit)
@@ -45,7 +45,7 @@ would if cold-starting from an in-band query)."
 Use NO-SOLICIT if wanting to avoid pre-startup questions (as one
 would if cold-starting from an in-band query)."
   (interactive)
-  (when-let ((buf (project-@PROVIDER@/get-buffer :no-solicit no-solicit)))
+  (when-let* ((buf (project-@PROVIDER@/get-buffer :no-solicit no-solicit)))
     (pop-to-buffer buf '((display-buffer-use-some-window) . ((some-window . mru))))))
 
 (cl-defun project-@PROVIDER@//wait-for (regex &key
@@ -60,19 +60,19 @@ would if cold-starting from an in-band query)."
 				 (goto-char from)
 				 (funcall (if absence #'not #'identity)
 					  (re-search-forward regex nil t))))
-	   do (accept-process-output @TEMU@--process 0.05 nil t)
+	   do (accept-process-output @TEMU_PKG@--process 0.05 nil t)
 	   finally return success))
 
 (defun project-@PROVIDER@//cursor-pos ()
   (save-excursion
     (goto-char (point-max))
     (re-search-backward project-@PROVIDER@/prompt-regex nil t)
-    (when-let ((x (text-property-search-forward
-		   'font-lock-face t
-		   (lambda (value prop)
-		     "What asshole wrote and documented t-p-s-f."
-		     (and (listp prop)
-			  (eq value (plist-get prop :inverse-video)))))))
+    (when-let* ((x (text-property-search-forward
+		    'font-lock-face t
+		    (lambda (value prop)
+		      "What asshole wrote and documented t-p-s-f."
+		      (and (listp prop)
+			   (eq value (plist-get prop :inverse-video)))))))
       (prop-match-beginning x))))
 
 (defun project-@PROVIDER@//mash (f)
@@ -81,7 +81,7 @@ would if cold-starting from an in-band query)."
 	   with doubly-sure = 0
 	   repeat 50
 	   do (funcall f)
-	   do (accept-process-output @TEMU@--process 0.05 nil t)
+	   do (accept-process-output @TEMU_PKG@--process 0.05 nil t)
 	   for current = (project-@PROVIDER@//cursor-pos)
 	   if (equal previous current)
 	   do (cl-incf doubly-sure)
@@ -95,33 +95,33 @@ would if cold-starting from an in-band query)."
 (defun project-@PROVIDER@/say (what)
   "Say WHAT."
   (project-@PROVIDER@/ensure-ready
-   ;; a simple @TEMU@-send-string followed by @TEMU@-send-key of
+   ;; a simple @TEMU_PKG@-send-string followed by @TEMU_PKG@-send-key of
    ;; <return> results in newline-terminated string and no
    ;; submission.
    (let ((inhibit-read-only t))
      ;; best effort to clear any residual crap before sending
-     (project-@PROVIDER@//mash (apply-partially #'@TEMU@-send-key "<down>"))
-     (project-@PROVIDER@//mash (apply-partially #'@TEMU@-send-key "e" nil nil :ctrl))
-     (project-@PROVIDER@//mash (apply-partially #'@TEMU@-send-key "<backspace>"))
-     (@TEMU@-send-string (format "\"%s\"" what))
-     (project-@PROVIDER@//mash (apply-partially #'@TEMU@-send-key "e" nil nil :ctrl))
-     (@TEMU@-send-key "<return>"))
-   ;; for @TEMU@--filter
-   (setq this-command '@TEMU@-send-key)))
+     (project-@PROVIDER@//mash (apply-partially #'@TEMU_PKG@-send-key "<down>"))
+     (project-@PROVIDER@//mash (apply-partially #'@TEMU_PKG@-send-key "e" nil nil :ctrl))
+     (project-@PROVIDER@//mash (apply-partially #'@TEMU_PKG@-send-key "<backspace>"))
+     (@TEMU_PKG@-send-string (format "\"%s\"" what))
+     (project-@PROVIDER@//mash (apply-partially #'@TEMU_PKG@-send-key "e" nil nil :ctrl))
+     (@TEMU_PKG@-send-key "<return>"))
+   ;; for @TEMU_PKG@--filter
+   (setq this-command '@TEMU_PKG@-send-key)))
 
 ;;;###autoload (require 'project-@PROVIDER@)
 (defun project-@PROVIDER@/insert-file-ref (most-recent-session)
-  "Bring up @TEMU@, inject a file ref.
+  "Bring up @TEMU_PKG@, inject a file ref.
 C-u to use project of last @PROVIDER_TITLE@ session instead of current buffer's."
   (interactive "P")
   (let* ((session-p (lambda (b)
 		      (with-current-buffer b
-			(and (eq major-mode '@TEMU@-mode)
+			(and (eq major-mode '@TEMU_PKG@-mode)
 			     (string-prefix-p "*@PROVIDER@" (buffer-name))
 			     (project-current)))))
 	 (parent-buf (current-buffer))
-	 (override (when-let ((b (when most-recent-session
-				   (seq-find session-p (buffer-list)))))
+	 (override (when-let* ((b (when most-recent-session
+				    (seq-find session-p (buffer-list)))))
 		     (with-current-buffer b
 		       (project-root (project-current)))))
 	 (file-ref (with-current-buffer parent-buf
@@ -132,11 +132,11 @@ C-u to use project of last @PROVIDER_TITLE@ session instead of current buffer's.
 		(let ((project-current-directory-override override))
 		  (project-@PROVIDER@/ensure-ready ;abbrev project-@PROVIDER@/say
 		   (let ((inhibit-read-only t))
-		     (@TEMU@-send-string (format "\"%s\" " file-ref))
+		     (@TEMU_PKG@-send-string (format "\"%s\" " file-ref))
 		     (project-@PROVIDER@//mash
-		      (apply-partially #'@TEMU@-send-key "e" nil nil :ctrl)))
-		   ;; for @TEMU@--filter
-		   (setq this-command '@TEMU@-send-key)
+		      (apply-partially #'@TEMU_PKG@-send-key "e" nil nil :ctrl)))
+		   ;; for @TEMU_PKG@--filter
+		   (setq this-command '@TEMU_PKG@-send-key)
 		   (current-buffer))))))
     (if (and (= (length (window-list)) 2)
 	     (eq buf (window-buffer (next-window))))
@@ -146,8 +146,8 @@ C-u to use project of last @PROVIDER_TITLE@ session instead of current buffer's.
 
 (defun project-@PROVIDER@/file-reference ()
   "Construct @PROVIDER_TITLE@ file reference from current position."
-  (when-let ((file (buffer-file-name))
-             (proj (project-current)))
+  (when-let* ((file (buffer-file-name))
+              (proj (project-current)))
     (let* ((rel-file (file-relative-name file (project-root proj)))
            (start (line-number-at-pos (if (use-region-p)
                                           (region-beginning)
