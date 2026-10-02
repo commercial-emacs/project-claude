@@ -20,11 +20,11 @@ TEMU ?= ghostty
 ifeq ($(TEMU),ghostty)
 TEMU_PKG  := ghostty-vt
 TEMU_DIR  := epkg/ghostty-vt
-TEMU_REPO := file:///home/dick/emacs-ghostty
+TEMU_REPO := https://github.com/dickmao/emacs-ghostty
 else
 TEMU_PKG  := vterm
 TEMU_DIR  := epkg/vterm
-TEMU_REPO := file:///home/dick/emacs-libvterm
+TEMU_REPO := https://github.com/commercial-emacs/emacs-libvterm
 endif
 
 .DEFAULT_GOAL := compile
