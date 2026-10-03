@@ -1,2 +1,2 @@
-((vterm :url "https://github.com/commercial-emacs/emacs-libvterm"
-	:sha1 "a68f5f3586bf7b97c0cb2f11c28ef489aa843e37"))
+((ghostty-vt :url "https://github.com/dickmao/emacs-ghostty" :sha1
+	     "bd080aba33decc30bf90ea484a843571fad9c995"))
