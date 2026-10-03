@@ -38,13 +38,14 @@ would if cold-starting from an in-band query)."
 		      (not (process-live-p @TEMU_PKG@--process)))
 	      (@TEMU_PKG@-mode))))))))
 
-;;;###autoload (require 'project-@PROVIDER@)
+;;;###autoload
 (cl-defun project-@PROVIDER@ (&key no-solicit)
   "Returns @PROVIDER_TITLE@ buffer for current project.
 
 Use NO-SOLICIT if wanting to avoid pre-startup questions (as one
 would if cold-starting from an in-band query)."
   (interactive)
+  (require 'project-@PROVIDER@)
   (when-let* ((buf (project-@PROVIDER@/get-buffer :no-solicit no-solicit)))
     (pop-to-buffer buf '((display-buffer-use-some-window) . ((some-window . mru))))))
 
@@ -109,11 +110,12 @@ would if cold-starting from an in-band query)."
    ;; for @TEMU_PKG@--filter
    (setq this-command '@TEMU_PKG@-send-key)))
 
-;;;###autoload (require 'project-@PROVIDER@)
+;;;###autoload
 (defun project-@PROVIDER@/insert-file-ref (most-recent-session)
   "Bring up @TEMU_PKG@, inject a file ref.
 C-u to use project of last @PROVIDER_TITLE@ session instead of current buffer's."
   (interactive "P")
+  (require 'project-@PROVIDER@)
   (let* ((session-p (lambda (b)
 		      (with-current-buffer b
 			(and (eq major-mode '@TEMU_PKG@-mode)
@@ -182,12 +184,13 @@ C-u to use project of last @PROVIDER_TITLE@ session instead of current buffer's.
             (define-key map (kbd "C-c '") #'project-@PROVIDER@/insert-file-ref)
             map))
 
-;;;###autoload (require 'project-@PROVIDER@)
+;;;###autoload
 (define-globalized-minor-mode global-project-@PROVIDER@-mode
   project-@PROVIDER@-mode (lambda ()
 			(when (derived-mode-p 'prog-mode)
 			  (project-@PROVIDER@-mode 1)))
-  :group 'project-@PROVIDER@)
+  :group 'project-@PROVIDER@
+  (require 'project-@PROVIDER@))
 
 (provide 'project-@PROVIDER@-generated)
 ;;; project-@PROVIDER@-generated.el ends here
