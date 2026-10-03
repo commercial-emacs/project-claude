@@ -4,14 +4,12 @@ epkg.mk:
 
 SHELL := /bin/bash
 EMACS ?= emacs
-ELSRC := project-claude-package.el
 TESTSRC := test-project-claude.el test-project-gemini.el
-ELGEN := project-claude.el project-gemini.el \
-         project-claude-generated.el project-gemini-generated.el
+ELGEN := project-claude.el project-gemini.el project-claude-generated.el project-gemini-generated.el
 TESTGEN := test-project-claude-generated.el test-project-gemini-generated.el
 
-EPKG_FILES := $(ELSRC) $(ELGEN)
-EPKG_EL := $(ELSRC) $(TESTSRC) $(ELGEN) $(TESTGEN)
+EPKG_EL := $(ELGEN)
+EPKG_FILES := $(EPKG_EL)
 EPKG_MAIN := project-claude.el
 EPKG_TEST_EL := $(TESTSRC)
 
@@ -78,4 +76,4 @@ veryclean: clean
 	git clean -dffX # removes TEMUs
 
 .PHONY: install
-install: epkg-install
+install: $(ELGEN) epkg-install
