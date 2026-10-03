@@ -69,12 +69,6 @@ test-project-gemini-generated.el: test-template.el
 .PHONY: test
 test: compile epkg-test
 
-.PHONY: dist-clean
-dist-clean: epkg-dist-clean
-
-.PHONY: dist
-dist: epkg-dist
-
 .PHONY: clean
 clean:
 	git clean -dfX
